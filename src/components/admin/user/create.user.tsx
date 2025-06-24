@@ -1,112 +1,150 @@
 import { useState } from "react";
-import { App, Divider, Form, Input, Modal } from "antd";
+import { App, Divider, Form, Input, Modal, Select } from "antd";
 import type { FormProps } from "antd";
-import { createUserAPI } from "@/services/api";
+import { checkEmailDuplicateAPI, createUserAPI } from "@/services/api";
+import axios from "axios";
 
 interface IProps {
   openModalCreate: boolean;
-  setOpenModalCreate: (v: boolean) => void;
+  setOpenModalCreate: (value: boolean) => void;
   refreshTable: () => void;
 }
 
 type FieldType = {
-  fullName: string;
-  password: string;
+  name: string;
   email: string;
   phone: string;
+  role: "admin" | "customer";
+  avatar: string;
 };
 
-const CreateUser = (props: IProps) => {
-  const { openModalCreate, setOpenModalCreate, refreshTable } = props;
-  const [isSubmit, setIsSubmit] = useState<boolean>(false);
+const CreateUser = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { message, notification } = App.useApp();
-
-  // https://ant.design/components/form#components-form-demo-control-hooks
   const [form] = Form.useForm();
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { fullName, password, email, phone } = values;
-    setIsSubmit(true);
-    const res = await createUserAPI(fullName, email, password, phone);
-    if (res && res.data) {
-      message.success("Tạo mới user thành công");
+  const { email } = values;
+
+  try {
+    //  Step 1: Call API to check email
+    const check = await checkEmailDuplicateAPI(email);
+    if (!check.success) {
+      notification.error({
+        message: "Error",
+        description: check.message || "Failed to check email",
+      });
+      return;
+    }
+
+    if (check.isDuplicate) {
+      notification.error({
+        message: "Email already exists",
+        description: `A user with email ${email} already exists.`,
+      });
+      return;
+    }
+
+    //  Step 2: Create new user
+    const payload = {
+      ...values,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setIsSubmitting(true);
+    const res = await createUserAPI(payload);
+
+    if (res.success && res.data) {
+      message.success("User created successfully");
       form.resetFields();
       setOpenModalCreate(false);
       refreshTable();
     } else {
       notification.error({
-        message: "Đã có lỗi xảy ra",
-        description: res.message,
+        message: "Error",
+        description: res.message || "Failed to create user",
       });
     }
-    setIsSubmit(false);
-  };
+  } catch (error: any) {
+    notification.error({
+      message: "Error",
+      description: error.message || "Something went wrong",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
-    <>
-      <Modal
-        title="Thêm mới người dùng"
-        open={openModalCreate}
-        onOk={() => {
-          form.submit();
-        }}
-        onCancel={() => {
-          setOpenModalCreate(false);
-          form.resetFields();
-        }}
-        okText={"Tạo mới"}
-        cancelText={"Hủy"}
-        confirmLoading={isSubmit}
-      >
-        <Divider />
+    <Modal
+      title="Create New User"
+      open={openModalCreate}
+      onOk={() => form.submit()}
+      onCancel={() => {
+        setOpenModalCreate(false);
+        form.resetFields();
+      }}
+      okText="Create"
+      cancelText="Cancel"
+      confirmLoading={isSubmitting}
+    >
+      <Divider />
 
-        <Form
-          form={form}
-          name="basic"
-          style={{ maxWidth: 600 }}
-          onFinish={onFinish}
-          autoComplete="off"
+      <Form
+        form={form}
+        layout="vertical"
+        name="create-user-form"
+        onFinish={onFinish}
+        autoComplete="off"
+      >
+        <Form.Item<FieldType>
+          label="Full Name"
+          name="name"
+          rules={[{ required: true, message: "Please enter full name" }]}
         >
-          <Form.Item<FieldType>
-            labelCol={{ span: 24 }}
-            label="Tên hiển thị"
-            name="fullName"
-            rules={[{ required: true, message: "Vui lòng nhập tên hiển thị!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item<FieldType>
-            labelCol={{ span: 24 }}
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item<FieldType>
-            labelCol={{ span: 24 }}
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Vui lòng nhập email!" },
-              { type: "email", message: "Email không đúng định dạng!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item<FieldType>
-            labelCol={{ span: 24 }}
-            label="Số điện thoại"
-            name="phone"
-            rules={[
-              { required: true, message: "Vui lòng nhập số điện thoại!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </>
+          <Input />
+        </Form.Item>
+
+        <Form.Item<FieldType>
+          label="Email"
+          name="email"
+          rules={[
+            { required: true, message: "Please enter email" },
+            { type: "email", message: "Invalid email format" },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item<FieldType>
+          label="Phone Number"
+          name="phone"
+          rules={[{ required: true, message: "Please enter phone number" }]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item<FieldType>
+          label="Role"
+          name="role"
+          rules={[{ required: true, message: "Please select a role" }]}
+        >
+          <Select placeholder="Select role">
+            <Select.Option value="admin">Admin</Select.Option>
+            <Select.Option value="customer">Customer</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item<FieldType>
+          label="Avatar URL"
+          name="avatar"
+          rules={[{ required: false, message: "Please enter avatar URL" }]}
+        >
+          <Input placeholder="https://..." />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 

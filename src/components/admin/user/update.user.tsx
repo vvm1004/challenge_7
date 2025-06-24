@@ -1,137 +1,147 @@
 import { useEffect, useState } from "react";
-import { App, Divider, Form, Input, Modal } from "antd";
+import { App, Divider, Form, Input, Modal, Select } from "antd";
 import type { FormProps } from "antd";
 import { updateUserAPI } from "@/services/api";
 
 interface IProps {
   openModalUpdate: boolean;
-  setOpenModalUpdate: (v: boolean) => void;
+  setOpenModalUpdate: (value: boolean) => void;
   refreshTable: () => void;
-  setDataUpdate: (v: IUserTable | null) => void;
+  setDataUpdate: (value: IUserTable | null) => void;
   dataUpdate: IUserTable | null;
 }
 
 type FieldType = {
-  _id: string;
+  id: string;
   email: string;
-  fullName: string;
+  name: string;
   phone: string;
+  role: "admin" | "customer";
+  avatar: string;
 };
 
-const UpdateUser = (props: IProps) => {
-  const {
-    openModalUpdate,
-    setOpenModalUpdate,
-    refreshTable,
-    setDataUpdate,
-    dataUpdate,
-  } = props;
-  const [isSubmit, setIsSubmit] = useState<boolean>(false);
+const UpdateUser = ({
+  openModalUpdate,
+  setOpenModalUpdate,
+  refreshTable,
+  setDataUpdate,
+  dataUpdate,
+}: IProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { message, notification } = App.useApp();
-
-  // https://ant.design/components/form#components-form-demo-control-hooks
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (dataUpdate) {
       form.setFieldsValue({
-        _id: dataUpdate._id,
-        fullName: dataUpdate.fullName,
+        id: dataUpdate.id,
+        name: dataUpdate.name,
         email: dataUpdate.email,
         phone: dataUpdate.phone,
+        role: dataUpdate.role,
+        avatar: dataUpdate.avatar,
       });
     }
   }, [dataUpdate]);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { _id, fullName, phone } = values;
-    setIsSubmit(true);
-    const res = await updateUserAPI(_id, fullName, phone);
+    const { id, ...updatedFields } = values;
+
+    setIsSubmitting(true);
+    const res = await updateUserAPI(id, {
+      ...updatedFields,
+      updatedAt: new Date().toISOString(),
+    });
+
     if (res && res.data) {
-      message.success("Cập nhật user thành công");
+      message.success("User updated successfully");
       form.resetFields();
       setOpenModalUpdate(false);
       setDataUpdate(null);
       refreshTable();
     } else {
       notification.error({
-        message: "Đã có lỗi xảy ra",
-        description: res.message,
+        message: "Error",
+        description: res.message || "Failed to update user",
       });
     }
-    setIsSubmit(false);
+    setIsSubmitting(false);
   };
 
   return (
-    <>
-      <Modal
-        title="Cập nhật người dùng"
-        open={openModalUpdate}
-        onOk={() => {
-          form.submit();
-        }}
-        onCancel={() => {
-          setOpenModalUpdate(false);
-          setDataUpdate(null);
-          form.resetFields();
-        }}
-        okText={"Cập nhật"}
-        cancelText={"Hủy"}
-        confirmLoading={isSubmit}
+    <Modal
+      title="Update User"
+      open={openModalUpdate}
+      onOk={() => form.submit()}
+      onCancel={() => {
+        setOpenModalUpdate(false);
+        setDataUpdate(null);
+        form.resetFields();
+      }}
+      okText="Update"
+      cancelText="Cancel"
+      confirmLoading={isSubmitting}
+    >
+      <Divider />
+
+      <Form
+        form={form}
+        name="update-user-form"
+        layout="vertical"
+        onFinish={onFinish}
+        autoComplete="off"
       >
-        <Divider />
+        <Form.Item<FieldType> name="id" hidden>
+          <Input />
+        </Form.Item>
 
-        <Form
-          form={form}
-          name="form-update"
-          style={{ maxWidth: 600 }}
-          onFinish={onFinish}
-          autoComplete="off"
+        <Form.Item<FieldType>
+          label="Email"
+          name="email"
+          rules={[
+            { required: true, message: "Please enter email" },
+            { type: "email", message: "Invalid email format" },
+          ]}
         >
-          <Form.Item<FieldType>
-            hidden
-            labelCol={{ span: 24 }}
-            label="_id"
-            name="_id"
-            rules={[{ required: true, message: "Vui lòng nhập _id!" }]}
-          >
-            <Input disabled />
-          </Form.Item>
+          <Input disabled />
+        </Form.Item>
 
-          <Form.Item<FieldType>
-            labelCol={{ span: 24 }}
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Vui lòng nhập email!" },
-              { type: "email", message: "Email không đúng định dạng!" },
-            ]}
-          >
-            <Input disabled />
-          </Form.Item>
+        <Form.Item<FieldType>
+          label="Full Name"
+          name="name"
+          rules={[{ required: true, message: "Please enter full name" }]}
+        >
+          <Input />
+        </Form.Item>
 
-          <Form.Item<FieldType>
-            labelCol={{ span: 24 }}
-            label="Tên hiển thị"
-            name="fullName"
-            rules={[{ required: true, message: "Vui lòng nhập tên hiển thị!" }]}
-          >
-            <Input />
-          </Form.Item>
+        <Form.Item<FieldType>
+          label="Phone Number"
+          name="phone"
+          rules={[{ required: true, message: "Please enter phone number" }]}
+        >
+          <Input />
+        </Form.Item>
 
-          <Form.Item<FieldType>
-            labelCol={{ span: 24 }}
-            label="Số điện thoại"
-            name="phone"
-            rules={[
-              { required: true, message: "Vui lòng nhập số điện thoại!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </>
+        <Form.Item<FieldType>
+          label="Role"
+          name="role"
+          rules={[{ required: true, message: "Please select role" }]}
+        >
+          <Select placeholder="Select role">
+            <Select.Option value="admin">Admin</Select.Option>
+            <Select.Option value="customer">Customer</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item<FieldType>
+          label="Avatar URL"
+          name="avatar"
+          rules={[{ required: false, message: "Please enter avatar URL" }]}
+        >
+          <Input placeholder="https://..." />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 

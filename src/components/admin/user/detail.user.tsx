@@ -1,4 +1,3 @@
-import { FORMATE_DATE_VN } from "@/services/helper";
 import { Avatar, Badge, Descriptions, Drawer } from "antd";
 import dayjs from "dayjs";
 
@@ -9,60 +8,65 @@ interface IProps {
   setDataViewDetail: (v: IUserTable | null) => void;
 }
 
-const DetailUser = (props: IProps) => {
-  const {
-    openViewDetail,
-    setOpenViewDetail,
-    dataViewDetail,
-    setDataViewDetail,
-  } = props;
-
+const DetailUser = ({
+  openViewDetail,
+  setOpenViewDetail,
+  dataViewDetail,
+  setDataViewDetail,
+}: IProps) => {
   const onClose = () => {
     setOpenViewDetail(false);
     setDataViewDetail(null);
   };
 
-  const avatarURL = `${import.meta.env.VITE_BACKEND_URL}/images/avatar/${
-    dataViewDetail?.avatar
-  }`;
-
   return (
-    <>
-      <Drawer
-        title="Chức năng xem chi tiết"
-        width={"50vw"}
-        onClose={onClose}
-        open={openViewDetail}
-      >
-        <Descriptions title="Thông tin user" bordered column={2}>
-          <Descriptions.Item label="Id">
-            {dataViewDetail?._id}
-          </Descriptions.Item>
-          <Descriptions.Item label="fullName">
-            {dataViewDetail?.fullName}
-          </Descriptions.Item>
-          <Descriptions.Item label="Email">
-            {dataViewDetail?.email}
-          </Descriptions.Item>
-          <Descriptions.Item label="Phone">
-            {dataViewDetail?.phone}
-          </Descriptions.Item>
+    <Drawer
+      title="User details"
+      width="50vw"
+      onClose={onClose}
+      open={openViewDetail}
+    >
+      <Descriptions title="Details" bordered column={2}>
+        <Descriptions.Item label="ID">
+          {dataViewDetail?.id}
+        </Descriptions.Item>
+        <Descriptions.Item label="Full Name">
+          {dataViewDetail?.name}
+        </Descriptions.Item>
+        <Descriptions.Item label="Email">
+          {dataViewDetail?.email}
+        </Descriptions.Item>
+        <Descriptions.Item label="Phone">
+          {dataViewDetail?.phone}
+        </Descriptions.Item>
+        <Descriptions.Item label="Role">
+          <Badge
+            status={dataViewDetail?.role === "admin" ? "processing" : "success"}
+            text={dataViewDetail?.role?.toUpperCase()}
+          />
+        </Descriptions.Item>
+       <Descriptions.Item label="Avatar">
+  <Avatar
+    size={40}
+    src={
+      dataViewDetail?.avatar ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(dataViewDetail?.name || "User")}&background=random`
+    }
+    // onError={(e) => {
+    //   (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dataViewDetail?.name || "User")}&background=random`;
+    // }}
+  />
+</Descriptions.Item>
 
-          <Descriptions.Item label="Role">
-            <Badge status="processing" text={dataViewDetail?.role} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Avatar">
-            <Avatar size={40} src={avatarURL} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Created At">
-            {dayjs(dataViewDetail?.createdAt).format(FORMATE_DATE_VN)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Updated At">
-            {dayjs(dataViewDetail?.updatedAt).format(FORMATE_DATE_VN)}
-          </Descriptions.Item>
-        </Descriptions>
-      </Drawer>
-    </>
+        <Descriptions.Item label="Created At">
+          {dayjs(dataViewDetail?.createdAt).format("MM-DD-YYYY HH:mm")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Updated At">
+          {dayjs(dataViewDetail?.updatedAt).format("MM-DD-YYYY HH:mm")}
+        </Descriptions.Item>
+      </Descriptions>
+    </Drawer>
   );
 };
+
 export default DetailUser;

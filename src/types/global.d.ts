@@ -1,4 +1,4 @@
-export {};
+export { };
 
 declare global {
   interface IBackendRes<T> {
@@ -49,17 +49,29 @@ declare global {
     user: IUser;
   }
 
-  interface IUserTable {
-    _id: string;
-    fullName: string;
+  // interface IUserTable {
+  //   _id: string;
+  //   fullName: string;
+  //   email: string;
+  //   phone: string;
+  //   role: string;
+  //   avatar: string;
+  //   isActive: boolean;
+  //   createdAt: Date;
+  //   updatedAt: Date;
+  // }
+
+  export interface IUserTable {
+    id?: number;
+    name: string;
     email: string;
     phone: string;
-    role: string;
     avatar: string;
-    isActive: boolean;
-    createdAt: Date;
-    updatedAt: Date;
+    role: "admin" | "customer";
+    createdAt: string; // vẫn là string nhưng định dạng ISO datetime
+    updatedAt: string;
   }
+
 
   interface IResponseImport {
     countSuccess: number;
@@ -104,5 +116,5 @@ declare global {
     updatedAt: Date;
   }
 
-   interface IOrderTable extends IHistory {}
+  interface IOrderTable extends IHistory { }
 }

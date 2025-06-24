@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "styles/global.scss";
 import { App, ConfigProvider } from "antd";
-import { AppProvider } from "components/context/app.context";
+// import { AppProvider } from "components/context/app.context";
 import DashBoardPage from "pages/admin/dashboard";
 import ManageBookPage from "pages/admin/manage.book";
 import ManageOrderPage from "pages/admin/manage.order";
@@ -49,11 +49,11 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App>
-      <AppProvider>
+      {/* <AppProvider> */}
         <ConfigProvider locale={enUS}>
           <RouterProvider router={router} />
         </ConfigProvider>
-      </AppProvider>
+      {/* </AppProvider> */}
     </App>
   </StrictMode>
 );

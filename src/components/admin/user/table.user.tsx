@@ -1,5 +1,4 @@
-import { deleteUserAPI, getUsersAPI } from "@/services/api";
-import { dateRangeValidate } from "@/services/helper";
+import { getUsersAPI, deleteUserAPI } from "@/services/api";
 import {
   CloudUploadOutlined,
   DeleteTwoTone,
@@ -9,57 +8,53 @@ import {
 } from "@ant-design/icons";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import { ProTable } from "@ant-design/pro-components";
-import { App, Button, Popconfirm } from "antd";
+import { App, Avatar, Button, Popconfirm, Tag } from "antd";
 import { useRef, useState } from "react";
 import DetailUser from "./detail.user";
 import CreateUser from "./create.user";
-import ImportUser from "./data/import.user";
-import { CSVLink } from "react-csv";
 import UpdateUser from "./update.user";
-
-type TSearch = {
-  fullName: string;
-  email: string;
-  createdAt: string;
-  createdAtRange: string;
-};
+import { CSVLink } from "react-csv";
 
 const TableUser = () => {
   const actionRef = useRef<ActionType>();
+  const [currentDataTable, setCurrentDataTable] = useState<IUserTable[]>([]);
+
   const [meta, setMeta] = useState({
     current: 1,
     pageSize: 5,
-    pages: 0,
     total: 0,
   });
 
-  const [openViewDetail, setOpenViewDetail] = useState<boolean>(false);
+  const [openViewDetail, setOpenViewDetail] = useState(false);
   const [dataViewDetail, setDataViewDetail] = useState<IUserTable | null>(null);
 
-  const [openModalCreate, setOpenModalCreate] = useState<boolean>(false);
-  const [openModalImport, setOpenModalImport] = useState<boolean>(false);
+  const [openModalCreate, setOpenModalCreate] = useState(false);
+  const [openModalImport, setOpenModalImport] = useState(false);
 
-  const [currentDataTable, setCurrentDataTable] = useState<IUserTable[]>([]);
-
-  const [openModalUpdate, setOpenModalUpdate] = useState<boolean>(false);
+  const [openModalUpdate, setOpenModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<IUserTable | null>(null);
 
-  const [isDeleteUser, setIsDeleteUser] = useState<boolean>(false);
+  const [isDeleteUser, setIsDeleteUser] = useState(false);
   const { message, notification } = App.useApp();
+  
 
-  const handleDeleteUser = async (_id: string) => {
+  const handleDeleteUser = async (id: number) => {
     setIsDeleteUser(true);
-    const res = await deleteUserAPI(_id);
-    if (res && res.data) {
-      message.success("Xóa user thành công");
+    const res = await deleteUserAPI(id);
+    if (res.success) {
+      message.success("Delete user successfully");
       refreshTable();
     } else {
       notification.error({
-        message: "Đã có lỗi xảy ra",
+        message: "An error occurred.",
         description: res.message,
       });
     }
     setIsDeleteUser(false);
+  };
+
+  const refreshTable = () => {
+    actionRef.current?.reload();
   };
 
   const columns: ProColumns<IUserTable>[] = [
@@ -69,10 +64,10 @@ const TableUser = () => {
       width: 48,
     },
     {
-      title: "Id",
-      dataIndex: "_id",
+      title: "ID",
+      dataIndex: "id",
       hideInSearch: true,
-      render(dom, entity, index, action, schema) {
+      render(dom, entity) {
         return (
           <a
             onClick={() => {
@@ -81,14 +76,32 @@ const TableUser = () => {
             }}
             href="#"
           >
-            {entity._id}
+            {entity.id}
           </a>
         );
       },
     },
+
+  {
+    title: "Avatar",
+    dataIndex: "avatar",
+    render: (_, record) => {
+      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(record.name || "User")}&background=random`;
+
+      return (
+        <Avatar
+          size={40}
+          src={record.avatar || defaultAvatar}
+          style={{ objectFit: "cover" }}
+        />
+      );
+    },
+    hideInSearch: true,
+    hideInTable: false,
+  },
     {
       title: "Full Name",
-      dataIndex: "fullName",
+      dataIndex: "name",
     },
     {
       title: "Email",
@@ -96,144 +109,147 @@ const TableUser = () => {
       copyable: true,
     },
     {
-      title: "Created At",
-      dataIndex: "createdAt",
-      valueType: "date",
-      sorter: true,
+      title: "Phone",
+      dataIndex: "phone",
       hideInSearch: true,
+      hideInTable: true,
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      valueType: "select",
+      valueEnum: {
+        admin: { text: "Admin", status: "Processing" },
+        customer: { text: "Customer", status: "Success" },
+      },
+      render: (_, record) => (
+        <Tag color={record.role === "admin" ? "geekblue" : "green"}>
+          {record.role.toUpperCase()}
+        </Tag>
+      ),
+      hideInSearch: true,
+      hideInTable: true,
     },
     {
       title: "Created At",
-      dataIndex: "createdAtRange",
-      valueType: "dateRange",
-      hideInTable: true,
+      dataIndex: "createdAt",
+      valueType: "dateTime",
+      sorter: true,
+      sortDirections: ["ascend"],
+      hideInSearch: true,
     },
-
+    {
+      title: "Updated At",
+      dataIndex: "updatedAt",
+      valueType: "dateTime",
+      sorter: true,
+      sortDirections: ["ascend"],
+      hideInTable: true,
+      hideInSearch: true,
+    },
     {
       title: "Action",
       hideInSearch: true,
-      render(dom, entity, index, action, schema) {
-        return (
-          <>
-            <EditTwoTone
-              twoToneColor="#f57800"
-              style={{ cursor: "pointer", marginRight: 15 }}
-              onClick={() => {
-                setDataUpdate(entity);
-                setOpenModalUpdate(true);
-              }}
-            />
-            <Popconfirm
-              placement="leftTop"
-              title={"Xác nhận xóa user"}
-              description={"Bạn có chắc chắn muốn xóa user này ?"}
-              onConfirm={() => handleDeleteUser(entity._id)}
-              okText="Xác nhận"
-              cancelText="Hủy"
-              okButtonProps={{ loading: isDeleteUser }}
-            >
-              <span style={{ cursor: "pointer", marginLeft: 20 }}>
-                <DeleteTwoTone
-                  twoToneColor="#ff4d4f"
-                  style={{ cursor: "pointer" }}
-                />
-              </span>
-            </Popconfirm>
-          </>
-        );
-      },
+      render: (_, entity) => (
+        <>
+          <EditTwoTone
+            twoToneColor="#f57800"
+            style={{ cursor: "pointer", marginRight: 15 }}
+            onClick={() => {
+              setDataUpdate(entity);
+              setOpenModalUpdate(true);
+            }}
+          />
+          <Popconfirm
+            title="Confirm user deletion"
+            description="Are you sure you want to delete this user?"
+            onConfirm={() => {
+              if (entity.id !== undefined) {
+                handleDeleteUser(entity.id);
+              } else {
+                notification.error({
+                  message: "Invalid user",
+                  description: "Cannot delete user with missing ID",
+                });
+              }
+            }}
+            okText="Confirm"
+            cancelText="Cancel"
+            okButtonProps={{ loading: isDeleteUser }}
+          >
+            <DeleteTwoTone twoToneColor="#ff4d4f" style={{ cursor: "pointer" }} />
+          </Popconfirm>
+        </>
+      ),
     },
   ];
 
-  const refreshTable = () => {
-    actionRef.current?.reload();
-  };
-
   return (
     <>
-      <ProTable<IUserTable, TSearch>
+      <ProTable<IUserTable>
         columns={columns}
         actionRef={actionRef}
         cardBordered
-        request={async (params, sort, filter) => {
-          let query = "";
-          if (params) {
-            query += `current=${params.current}&pageSize=${params.pageSize}`;
-            if (params.email) {
-              query += `&email=/${params.email}/i`;
-            }
-            if (params.fullName) {
-              query += `&fullName=/${params.fullName}/i`;
-            }
+        request={async (params, sort) => {
+          const query: Record<string, any> = {
+            _page: params.current,
+            _per_page: params.pageSize,
+          };
 
-            const createDateRange = dateRangeValidate(params.createdAtRange);
-            if (createDateRange) {
-              query += `&createdAt>=${createDateRange[0]}&createdAt<=${createDateRange[1]}`;
-            }
+          if (params.name) query.name = params.name;
+          if (params.email) query.email = params.email;
+
+          if (sort?.createdAt) {
+            query._sort = "createdAt";
           }
-
-          //default
-          if (sort && sort.createdAt) {
-            query += `&sort=${
-              sort.createdAt === "ascend" ? "createdAt" : "-createdAt"
-            }`;
-          } else query += `&sort=-createdAt`;
+          if (sort?.updatedAt) {
+            query._sort = "updatedAt";
+          }
 
           const res = await getUsersAPI(query);
-          if (res.data) {
-            setMeta(res.data.meta);
-            setCurrentDataTable(res.data?.result ?? []);
-          }
+
+          setCurrentDataTable(res.result);
+          setMeta({
+            current: params.current || 1,
+            pageSize: params.pageSize || 5,
+            total: res.total || 0,
+          });
+
           return {
-            data: res.data?.result,
-            page: 1,
+            data: res.result,
+            total: res.total,
             success: true,
-            total: res.data?.meta.total,
           };
         }}
-        rowKey="_id"
+
+
+
+        rowKey="id"
         pagination={{
           current: meta.current,
           pageSize: meta.pageSize,
-          showSizeChanger: true,
           total: meta.total,
-          showTotal: (total, range) => {
-            return (
-              <div>
-                {" "}
-                {range[0]}-{range[1]} trên {total} rows
-              </div>
-            );
-          },
+          showSizeChanger: true,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} trên ${total} rows`,
         }}
-        headerTitle="Table user"
+        headerTitle="User Management"
         toolBarRender={() => [
           <CSVLink data={currentDataTable} filename="export-user.csv">
             <Button icon={<ExportOutlined />} type="primary">
               Export
             </Button>
           </CSVLink>,
-
           <Button
-            icon={<CloudUploadOutlined />}
-            type="primary"
-            onClick={() => setOpenModalImport(true)}
-          >
-            Import
-          </Button>,
-
-          <Button
-            key="button"
             icon={<PlusOutlined />}
-            onClick={() => {
-              setOpenModalCreate(true);
-            }}
             type="primary"
+            onClick={() => setOpenModalCreate(true)}
           >
-            Add new
+            Add New
           </Button>,
         ]}
       />
+
       <DetailUser
         openViewDetail={openViewDetail}
         setOpenViewDetail={setOpenViewDetail}
@@ -244,12 +260,6 @@ const TableUser = () => {
       <CreateUser
         openModalCreate={openModalCreate}
         setOpenModalCreate={setOpenModalCreate}
-        refreshTable={refreshTable}
-      />
-
-      <ImportUser
-        openModalImport={openModalImport}
-        setOpenModalImport={setOpenModalImport}
         refreshTable={refreshTable}
       />
 

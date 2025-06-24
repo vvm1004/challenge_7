@@ -1,93 +1,151 @@
 import axios from "services/axios.customize";
 
-export const loginAPI = (username: string, password: string) => {
-  const urlBackend = "/api/v1/auth/login";
-  return axios.post<IBackendRes<ILogin>>(
-    urlBackend,
-    { username, password },
-    {
-      headers: {
-        delay: 3000,
-      },
+// export const fetchAccountAPI = () => {
+//   const urlBackend = "/api/v1/auth/account";
+//   return axios.get<IBackendRes<IFetchAccount>>(urlBackend, {
+//     headers: {
+//       delay: 1000,
+//     },
+//   });
+// };
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+//User Module
+export const getUsersAPI = async (params: Record<string, any>) => {
+  await delay(50); 
+  const res = await axios.get("/users", { params });
+  return {
+    result: res.data.data, // mảng user
+    total: res.data.items, // tổng số user
+  };
+};
+
+export const deleteUserAPI = async (id: number) => {
+  try {
+    await axios.delete(`/users/${id}`);
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
+}
+
+export const createUserAPI = async (data: 
+ IUserTable
+) => {
+  try {
+    const response = await axios.post(`/users`, data);
+    return {
+      data: response.data,
+      success: true,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to create user",
+    };
+  }
+};
+
+export const updateUserAPI = async (id: string, data: Partial<IUserTable>) => {
+  try {
+    const response = await axios.patch(`/users/${id}`, data);
+    return {
+      data: response.data,
+      success: true,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to update user",
+    };
+  }
+};
+
+export const checkEmailDuplicateAPI = async (email: string) => {
+  try {
+    const response = await axios.get(`/users?email=${email}`);
+    return {
+      success: true,
+      isDuplicate: response.data.length > 0,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Failed to check email",
+    };
+  }
+};
+
+export const bulkCreateUserAPI = async (users: Partial<IUserTable>[]) => {
+  try {
+    // Step 1: Get all existing users
+    const existingRes = await axios.get(`/users`);
+    const existingUsers = existingRes.data;
+    const existingEmails = new Set(existingUsers.map((user: any) => user.email));
+
+    // Step 2: Get max ID
+    let maxId = existingUsers.reduce((max: number, user: any) => {
+      const idNum = parseInt(user.id, 10);
+      return isNaN(idNum) ? max : Math.max(max, idNum);
+    }, 0);
+
+    // Step 3: Filter out duplicate emails and prepare valid users
+    const now = new Date().toISOString();
+    const validUsers: IUserTable[] = [];
+    let countError = 0;
+
+    for (const user of users) {
+      if (existingEmails.has(user.email)) {
+        countError++;
+        continue;
+      }
+
+      maxId++;
+
+      validUsers.push({
+        id: maxId.toString(),
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        avatar: user.avatar || "",
+        role: user.role || "customer",
+        createdAt: now,
+        updatedAt: now,
+      });
     }
-  );
+
+    // Step 4: Send each user with POST
+    const postRequests = validUsers.map((user) => axios.post(`/users`, user));
+    await Promise.all(postRequests);
+
+    return {
+      success: true,
+      data: {
+        countSuccess: validUsers.length,
+        countError,
+      },
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || "Bulk create failed",
+    };
+  }
 };
 
-export const registerAPI = (
-  fullName: string,
-  email: string,
-  password: string,
-  phone: string
-) => {
-  const urlBackend = "/api/v1/user/register";
-  return axios.post<IBackendRes<IRegister>>(urlBackend, {
-    fullName,
-    email,
-    password,
-    phone,
-  });
-};
+// export const bulkCreateUserAPI = (
+//   hoidanit: {
+//     fullName: string;
+//     password: string;
+//     email: string;
+//     phone: string;
+//   }[]
+// ) => {
+//   const urlBackend = "/api/v1/user/bulk-create";
+//   return axios.post<IBackendRes<IResponseImport>>(urlBackend, hoidanit);
+// };
 
-export const fetchAccountAPI = () => {
-  const urlBackend = "/api/v1/auth/account";
-  return axios.get<IBackendRes<IFetchAccount>>(urlBackend, {
-    headers: {
-      delay: 1000,
-    },
-  });
-};
-
-export const logoutAPI = () => {
-  const urlBackend = "/api/v1/auth/logout";
-  return axios.post<IBackendRes<IRegister>>(urlBackend);
-};
-
-export const getUsersAPI = (query: string) => {
-  const urlBackend = `/api/v1/user?${query}`;
-  return axios.get<IBackendRes<IModelPaginate<IUserTable>>>(urlBackend);
-};
-
-export const createUserAPI = (
-  fullName: string,
-  email: string,
-  password: string,
-  phone: string
-) => {
-  const urlBackend = "/api/v1/user";
-  return axios.post<IBackendRes<IRegister>>(urlBackend, {
-    fullName,
-    email,
-    password,
-    phone,
-  });
-};
-
-export const bulkCreateUserAPI = (
-  hoidanit: {
-    fullName: string;
-    password: string;
-    email: string;
-    phone: string;
-  }[]
-) => {
-  const urlBackend = "/api/v1/user/bulk-create";
-  return axios.post<IBackendRes<IResponseImport>>(urlBackend, hoidanit);
-};
-
-export const updateUserAPI = (_id: string, fullName: string, phone: string) => {
-  const urlBackend = "/api/v1/user";
-  return axios.put<IBackendRes<IRegister>>(urlBackend, {
-    _id,
-    fullName,
-    phone,
-  });
-};
-
-export const deleteUserAPI = (_id: string) => {
-  const urlBackend = `/api/v1/user/${_id}`;
-  return axios.delete<IBackendRes<IRegister>>(urlBackend);
-};
-
+//Book Module
 export const getBooksAPI = (query: string) => {
   const urlBackend = `/api/v1/book?${query}`;
   return axios.get<IBackendRes<IModelPaginate<IBookTable>>>(urlBackend, {
