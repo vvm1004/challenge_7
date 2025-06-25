@@ -10,8 +10,11 @@ const AdminDashboard = () => {
     countBook: 0,
   });
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const initDashboard = async () => {
+      setLoading(true);
       const res = await getDashboardAPI();
       if (res && res.success && res.data) {
         setDataDashboard({
@@ -20,6 +23,7 @@ const AdminDashboard = () => {
           countOrder: res.data.countOrder ?? 0,
         });
       }
+      setLoading(false);
     };
     initDashboard();
   }, []);
@@ -27,9 +31,9 @@ const AdminDashboard = () => {
   const formatter = (value: any) => <CountUp end={value} separator="," />;
 
   return (
-    <Row gutter={[40, 40]}>
-      <Col span={8}>
-        <Card bordered={false}>
+    <Row gutter={[24, 24]} justify="center">
+      <Col xs={24} sm={12} md={8}>
+        <Card bordered={false} loading={loading}>
           <Statistic
             title="Total Users"
             value={dataDashboard.countUser}
@@ -37,8 +41,8 @@ const AdminDashboard = () => {
           />
         </Card>
       </Col>
-      <Col span={8}>
-        <Card bordered={false}>
+      <Col xs={24} sm={12} md={8}>
+        <Card bordered={false} loading={loading}>
           <Statistic
             title="Total Orders"
             value={dataDashboard.countOrder}
@@ -46,8 +50,8 @@ const AdminDashboard = () => {
           />
         </Card>
       </Col>
-      <Col span={8}>
-        <Card bordered={false}>
+      <Col xs={24} sm={12} md={8}>
+        <Card bordered={false} loading={loading}>
           <Statistic
             title="Total Books"
             value={dataDashboard.countBook}
