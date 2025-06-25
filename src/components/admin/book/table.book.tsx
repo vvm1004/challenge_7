@@ -10,51 +10,43 @@ import DetailBook from "./detail.book";
 import { CSVLink } from "react-csv";
 import { ProTable } from "@ant-design/pro-components";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
-import { dateRangeValidate } from "@/services/helper";
 import { deleteBookAPI, getBooksAPI } from "@/services/api";
 import CreateBook from "./create.book";
 import UpdateBook from "./update.book";
 
+
 type TSearch = {
-  mainText: string;
+  name: string;
   author: string;
-  createdAt: string;
-  createdAtRange: string;
-  updatedAt: string;
-  updatedAtRange: string;
-  price: number;
+  category: string;
 };
+
 const TableBook = () => {
   const actionRef = useRef<ActionType>();
   const [meta, setMeta] = useState({
     current: 1,
     pageSize: 5,
-    pages: 0,
     total: 0,
   });
 
-  const [openViewDetail, setOpenViewDetail] = useState<boolean>(false);
+  const [openViewDetail, setOpenViewDetail] = useState(false);
   const [dataViewDetail, setDataViewDetail] = useState<IBookTable | null>(null);
-
-  const [openModalCreate, setOpenModalCreate] = useState<boolean>(false);
-
+  const [openModalCreate, setOpenModalCreate] = useState(false);
   const [currentDataTable, setCurrentDataTable] = useState<IBookTable[]>([]);
-
-  const [openModalUpdate, setOpenModalUpdate] = useState<boolean>(false);
+  const [openModalUpdate, setOpenModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<IBookTable | null>(null);
-
-  const [isDeleteBook, setIsDeleteBook] = useState<boolean>(false);
+  const [isDeleteBook, setIsDeleteBook] = useState(false);
   const { message, notification } = App.useApp();
 
-  const handleDeleteBook = async (_id: string) => {
+  const handleDeleteBook = async (id: number) => {
     setIsDeleteBook(true);
-    const res = await deleteBookAPI(_id);
-    if (res && res.data) {
-      message.success("Xóa book thành công");
+    const res = await deleteBookAPI(id);
+    if (res && res.success) {
+      message.success("Deleted book successfully");
       refreshTable();
     } else {
       notification.error({
-        message: "Đã có lỗi xảy ra",
+        message: "Error occurred",
         description: res.message,
       });
     }
@@ -67,94 +59,101 @@ const TableBook = () => {
 
   const columns: ProColumns<IBookTable>[] = [
     {
-      title: "Id",
-      dataIndex: "_id",
+      dataIndex: "index",
+      valueType: "indexBorder",
+      width: 48,
+    },
+    {
+      title: "Book ID",
+      dataIndex: "id",
       hideInSearch: true,
-      render(dom, entity, index, action, schema) {
-        return (
-          <a
-            href="#"
-            onClick={() => {
-              setDataViewDetail(entity);
-              setOpenViewDetail(true);
-            }}
-          >
-            {entity._id}
-          </a>
-        );
-      },
+      render: (_, entity) => (
+        <a
+          onClick={() => {
+            setDataViewDetail(entity);
+            setOpenViewDetail(true);
+          }}
+        >
+          {entity.id}
+        </a>
+      ),
     },
     {
-      title: "Tên sách",
-      dataIndex: "mainText",
-      sorter: true,
+      title: "Name",
+      dataIndex: "name",
     },
     {
-      title: "Thể loại",
-      dataIndex: "category",
-      hideInSearch: true,
-    },
-    {
-      title: "Tác giả",
+      title: "Author",
       dataIndex: "author",
-      sorter: true,
     },
     {
-      title: "Giá tiền",
+      title: "Category",
+      dataIndex: "category",
+      // hideInSearch: true,
+    },
+    {
+      title: "Price",
       dataIndex: "price",
       hideInSearch: true,
+      render: (_, record) =>
+        new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(record.price),
       sorter: true,
-      // https://stackoverflow.com/questions/37985642/vnd-currency-formatting
-      render(dom, entity, index, action, schema) {
-        return (
-          <>
-            {new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            }).format(entity.price)}
-          </>
-        );
-      },
+      sortDirections: ["ascend"],
     },
     {
-      title: "Ngày cập nhật",
+      title: "Created At",
+      dataIndex: "createdAt",
+      valueType: "dateTime",
+      hideInSearch: true,
+      sorter: true,
+      sortDirections: ["ascend"],
+    },
+    {
+      title: "Updated At",
       dataIndex: "updatedAt",
-      sorter: true,
-      valueType: "date",
+      valueType: "dateTime",
       hideInSearch: true,
+      hideInTable: true,
     },
-
     {
-      title: "Action",
+      title: "Actions",
       hideInSearch: true,
-      render(dom, entity, index, action, schema) {
-        return (
-          <>
-            <EditTwoTone
-              twoToneColor="#f57800"
-              style={{ cursor: "pointer", margin: "0 10px" }}
-              onClick={() => {
-                setOpenModalUpdate(true);
-                setDataUpdate(entity);
-              }}
-            />
-
-            <Popconfirm
-              placement="leftTop"
-              title={"Xác nhận xóa book"}
-              description={"Bạn có chắc chắn muốn xóa book này ?"}
-              onConfirm={() => handleDeleteBook(entity._id)}
-              okText="Xác nhận"
-              cancelText="Hủy"
-              okButtonProps={{ loading: isDeleteBook }}
-            >
-              <span style={{ cursor: "pointer" }}>
-                <DeleteTwoTone twoToneColor="#ff4d4f" />
-              </span>
-            </Popconfirm>
-          </>
-        );
-      },
+      render: (_, entity) => (
+        <>
+          <EditTwoTone
+            twoToneColor="#f57800"
+            style={{ cursor: "pointer", marginRight: 10 }}
+            onClick={() => {
+              setOpenModalUpdate(true);
+              setDataUpdate(entity);
+            }}
+          />
+          <Popconfirm
+            placement="leftTop"
+            title="Confirm delete book"
+            description="Are you sure to delete this book?"
+            onConfirm={() => {
+              if (entity.id !== undefined) {
+                handleDeleteBook(entity.id);
+              } else {
+                notification.error({
+                  message: "Invalid book",
+                  description: "Cannot delete book with missing ID",
+                });
+              }
+            }} okText="Yes"
+            cancelText="No"
+            okButtonProps={{ loading: isDeleteBook }}
+          >
+            <span style={{ cursor: "pointer" }}>
+              <DeleteTwoTone twoToneColor="#ff4d4f" />
+            </span>
+          </Popconfirm>
+        </>
+      ),
     },
   ];
 
@@ -164,89 +163,60 @@ const TableBook = () => {
         columns={columns}
         actionRef={actionRef}
         cardBordered
-        request={async (params, sort, filter) => {
-          let query = "";
-          if (params) {
-            query += `current=${params.current}&pageSize=${params.pageSize}`;
-            if (params.mainText) {
-              query += `&mainText=/${params.mainText}/i`;
-            }
-            if (params.author) {
-              query += `&author=/${params.author}/i`;
-            }
+        request={async (params, sort) => {
+          const query: Record<string, any> = {
+            _page: params.current,
+            _per_page: params.pageSize,
+          };
 
-            const createDateRange = dateRangeValidate(params.createdAtRange);
-            if (createDateRange) {
-              query += `&createdAt>=${createDateRange[0]}&createdAt<=${createDateRange[1]}`;
-            }
-          }
+          if (params.name) query.name = params.name;
+          if (params.author) query.author = params.author;
+          if (params.category) query.category = params.category;
 
-          if (sort && sort.createdAt) {
-            query += `&sort=${
-              sort.createdAt === "ascend" ? "createdAt" : "-createdAt"
-            }`;
-          } else query += `&sort=-createdAt`;
-
-          if (sort && sort.mainText) {
-            query += `&sort=${
-              sort.mainText === "ascend" ? "mainText" : "-mainText"
-            }`;
-          }
-
-          if (sort && sort.author) {
-            query += `&sort=${sort.author === "ascend" ? "author" : "-author"}`;
-          }
-          if (sort && sort.price) {
-            query += `&sort=${sort.price === "ascend" ? "price" : "-price"}`;
-          }
+          if (sort?.createdAt) query._sort = "createdAt";
+          if (sort?.price) query._sort = "price";
 
           const res = await getBooksAPI(query);
-          if (res.data) {
-            setMeta(res.data.meta);
-            setCurrentDataTable(res.data?.result ?? []);
-          }
+
+          setCurrentDataTable(res.result);
+          setMeta({
+            current: params.current || 1,
+            pageSize: params.pageSize || 5,
+            total: res.total || 0,
+          });
+
           return {
-            data: res.data?.result,
-            page: 1,
+            data: res.result,
+            total: res.total,
             success: true,
-            total: res.data?.meta.total,
           };
         }}
-        rowKey="_id"
+
+        rowKey="id"
         pagination={{
           current: meta.current,
           pageSize: meta.pageSize,
-          showSizeChanger: true,
           total: meta.total,
-          showTotal: (total, range) => {
-            return (
-              <div>
-                {" "}
-                {range[0]}-{range[1]} trên {total} rows
-              </div>
-            );
-          },
+          showSizeChanger: true,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} rows`,
         }}
-        headerTitle="Table book"
+        headerTitle="Books Table"
         toolBarRender={() => [
-          <CSVLink data={currentDataTable} filename="export-book.csv">
+          <CSVLink data={currentDataTable} filename="books.csv">
             <Button icon={<ExportOutlined />} type="primary">
               Export
             </Button>
           </CSVLink>,
-
           <Button
-            key="button"
             icon={<PlusOutlined />}
-            onClick={() => {
-              setOpenModalCreate(true);
-            }}
             type="primary"
+            onClick={() => setOpenModalCreate(true)}
           >
-            Add new
+            Add New Book
           </Button>,
         ]}
       />
+
       <DetailBook
         openViewDetail={openViewDetail}
         setOpenViewDetail={setOpenViewDetail}

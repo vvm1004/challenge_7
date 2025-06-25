@@ -49,19 +49,7 @@ declare global {
     user: IUser;
   }
 
-  // interface IUserTable {
-  //   _id: string;
-  //   fullName: string;
-  //   email: string;
-  //   phone: string;
-  //   role: string;
-  //   avatar: string;
-  //   isActive: boolean;
-  //   createdAt: Date;
-  //   updatedAt: Date;
-  // }
-
-  export interface IUserTable {
+  interface IUserTable {
     id?: number;
     name: string;
     email: string;
@@ -80,18 +68,18 @@ declare global {
   }
 
   interface IBookTable {
-    _id: string;
-    thumbnail: string;
-    slider: string[];
-    mainText: string;
+    id?: number;
+    name: string;
+    description?: string;
     author: string;
     price: number;
-    sold: number;
-    quantity: number;
+    stock: number;
     category: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: string;
+    updatedAt: string;
+    thumbnail?: string;
   }
+
 
   interface ICart {
     _id: string;
@@ -99,22 +87,38 @@ declare global {
     detail: IBookTable;
   }
 
-  interface IHistory {
-    _id: string;
-    name: string;
-    type: string;
-    email: string;
-    phone: string;
-    userId: string;
-    detail: {
-      bookName: string;
-      quantity: number;
-      _id: string;
-    }[];
-    totalPrice: number;
-    createdAt: Date;
-    updatedAt: Date;
-  }
+  // interface IHistory {
+  //   _id: string;
+  //   name: string;
+  //   type: string;
+  //   email: string;
+  //   phone: string;
+  //   userId: string;
+  //   detail: {
+  //     bookName: string;
+  //     quantity: number;
+  //     _id: string;
+  //   }[];
+  //   totalPrice: number;
+  //   createdAt: Date;
+  //   updatedAt: Date;
+  // }
 
-  interface IOrderTable extends IHistory { }
+  // interface IOrderTable extends IHistory { }
+
+ type OrderStatus = "pending" | "processing" | "shipped" | "delivered";
+ 
+ interface IOrder {
+   id: number;
+   userId: number;
+   productIds: number[];
+   amount: number;
+   totalPrice: number;
+   status: OrderStatus;
+   createdAt: string;
+ }
+ interface IOrderWithUser extends IOrder {
+  userFullName?: string;
+}
+
 }

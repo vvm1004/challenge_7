@@ -64,7 +64,7 @@ const TableUser = () => {
       width: 48,
     },
     {
-      title: "ID",
+      title: "User ID",
       dataIndex: "id",
       hideInSearch: true,
       render(dom, entity) {
@@ -233,7 +233,7 @@ const TableUser = () => {
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} trên ${total} rows`,
         }}
-        headerTitle="User Management"
+        headerTitle="Users Table"
         toolBarRender={() => [
           <CSVLink data={currentDataTable} filename="export-user.csv">
             <Button icon={<ExportOutlined />} type="primary">

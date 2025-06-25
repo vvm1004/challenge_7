@@ -12,7 +12,7 @@ interface IProps {
 }
 
 type FieldType = {
-  id: string;
+  id: number;
   email: string;
   name: string;
   phone: string;

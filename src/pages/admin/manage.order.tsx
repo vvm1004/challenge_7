@@ -1,4 +1,4 @@
-import TableOrder from "@/components/admin/order";
+import TableOrder from "@/components/admin/order/table.order";
 
 const ManageOrderPage = () => {
   return (
