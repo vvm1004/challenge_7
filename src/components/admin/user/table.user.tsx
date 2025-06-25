@@ -62,6 +62,7 @@ const TableUser = () => {
       dataIndex: "index",
       valueType: "indexBorder",
       width: 48,
+      responsive: ["md"],
     },
     {
       title: "User ID",
@@ -80,6 +81,7 @@ const TableUser = () => {
           </a>
         );
       },
+      
     },
 
   {
@@ -98,10 +100,12 @@ const TableUser = () => {
     },
     hideInSearch: true,
     hideInTable: false,
+    responsive: ["md"],
   },
     {
       title: "Full Name",
       dataIndex: "name",
+      responsive: ["md"],
     },
     {
       title: "Email",
@@ -137,6 +141,8 @@ const TableUser = () => {
       sorter: true,
       sortDirections: ["ascend"],
       hideInSearch: true,
+      responsive: ["md"],
+      
     },
     {
       title: "Updated At",

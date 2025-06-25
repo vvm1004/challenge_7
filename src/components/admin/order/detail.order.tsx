@@ -1,5 +1,3 @@
-// src/pages/admin/order/detail.order.tsx
-
 import { Badge, Descriptions, Divider, Drawer } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
@@ -20,6 +18,8 @@ const DetailOrder = ({
 }: IProps) => {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [bookList, setBookList] = useState<any[]>([]);
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -52,11 +52,12 @@ const DetailOrder = ({
   return (
     <Drawer
       title={`Order #${dataViewDetail?.id}`}
-      width={"60vw"}
+      width={isMobile ? "100vw" : "60vw"}
       open={openViewDetail}
       onClose={onClose}
+      bodyStyle={{ padding: 16 }}
     >
-      <Descriptions title="User Information" bordered column={2}>
+      <Descriptions title="User Information" bordered column={isMobile ? 1 : 2}>
         <Descriptions.Item label="Full Name">{userInfo?.name}</Descriptions.Item>
         <Descriptions.Item label="Email">{userInfo?.email}</Descriptions.Item>
         <Descriptions.Item label="Phone">{userInfo?.phone}</Descriptions.Item>
@@ -81,7 +82,7 @@ const DetailOrder = ({
       </Descriptions>
 
       <Divider orientation="left">Order Info</Divider>
-      <Descriptions bordered column={2}>
+      <Descriptions bordered column={isMobile ? 1 : 2}>
         <Descriptions.Item label="Amount">{dataViewDetail?.amount}</Descriptions.Item>
         <Descriptions.Item label="Total Price">
           {new Intl.NumberFormat("vi-VN", {

@@ -23,6 +23,8 @@ const DetailBook = ({
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   useEffect(() => {
     if (dataViewDetail?.thumbnail) {
       const file: UploadFile = {
@@ -62,11 +64,12 @@ const DetailBook = ({
   return (
     <Drawer
       title="Book Details"
-      width={"60vw"}
+      width={isMobile ? "100vw" : "60vw"}
       open={openViewDetail}
       onClose={onClose}
+      bodyStyle={{ padding: 16 }}
     >
-      <Descriptions title="Book Information" bordered column={2}>
+      <Descriptions title="Book Information" bordered column={isMobile ? 1 : 2}>
         <Descriptions.Item label="ID">{dataViewDetail?.id}</Descriptions.Item>
         <Descriptions.Item label="Name">{dataViewDetail?.name}</Descriptions.Item>
         <Descriptions.Item label="Author">{dataViewDetail?.author}</Descriptions.Item>

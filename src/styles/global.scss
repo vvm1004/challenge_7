@@ -72,3 +72,17 @@
     background: #7d7d7d;
   }
 }
+@media (max-width: 768px) {
+  .ant-pro-table .ant-table-cell {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .ant-pro-table .ant-table-thead > tr > th {
+    font-size: 12px;
+  }
+
+  .ant-table-wrapper {
+    overflow-x: auto;
+  }
+}

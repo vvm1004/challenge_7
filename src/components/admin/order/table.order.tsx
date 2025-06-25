@@ -24,86 +24,90 @@ const TableOrder = () => {
   const [dataUpdate, setDataUpdate] = useState<IOrderWithUser | null>(null);
 
   const columns: ProColumns<IOrderWithUser>[] = [
-    {
-      dataIndex: "index",
-      valueType: "indexBorder",
-      width: 48,
+  {
+    dataIndex: "index",
+    valueType: "indexBorder",
+    width: 48,
+    responsive: ["sm"],
+  },
+  {
+    title: "Order ID",
+    dataIndex: "id",
+    render: (_, entity) => (
+      <a
+        onClick={() => {
+          setDataViewDetail(entity);
+          setOpenViewDetail(true);
+        }}
+      >
+        {entity.id}
+      </a>
+    ),
+    hideInSearch: true,
+  },
+  {
+    title: "Full Name",
+    dataIndex: "userFullName",
+    hideInSearch: true,
+    // responsive: ["md"],
+  },
+  {
+    title: "Total Price",
+    dataIndex: "totalPrice",
+    render: (_, record) =>
+      new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      }).format(record.totalPrice || 0),
+    hideInSearch: true,
+    responsive: ["md"],
+  },
+  {
+    title: "Status",
+    dataIndex: "status",
+    valueType: "select",
+    valueEnum: {
+      pending: { text: "Pending", status: "Warning" },
+      processing: { text: "Processing", status: "Processing" },
+      shipped: { text: "Shipped", status: "Default" },
+      delivered: { text: "Delivered", status: "Success" },
     },
-    {
-      title: "Order ID",
-      dataIndex: "id",
-      render: (_, entity) => (
-        <a
-          onClick={() => {
-            setDataViewDetail(entity);
-            setOpenViewDetail(true);
-          }}
-        >
-          {entity.id}
-        </a>
-      ),
-      hideInSearch: true,
-    },
-    {
-      title: "Full Name",
-      dataIndex: "userFullName",
-      hideInSearch: true,
-    },
-    {
-      title: "Total Price",
-      dataIndex: "totalPrice",
-      render: (_, record) =>
-        new Intl.NumberFormat("vi-VN", {
-          style: "currency",
-          currency: "VND",
-        }).format(record.totalPrice || 0),
-      hideInSearch: true,
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      valueType: "select",
-      valueEnum: {
-        pending: { text: "Pending", status: "Warning" },
-        processing: { text: "Processing", status: "Processing" },
-        shipped: { text: "Shipped", status: "Default" },
-        delivered: { text: "Delivered", status: "Success" },
-      },
-    },
+  },
+  {
+    title: "Created At",
+    dataIndex: "createdAt",
+    valueType: "dateTime",
+    sorter: true,
+    hideInSearch: true,
+    sortDirections: ["ascend"],
+    responsive: ["md"],
+  },
+  {
+    title: "Updated At",
+    dataIndex: "updatedAt",
+    valueType: "dateTime",
+    sorter: true,
+    hideInSearch: true,
+    sortDirections: ["ascend"],
+    hideInTable: true,
+  },
+  {
+    title: "Actions",
+    hideInSearch: true,
+    render: (_, entity) => (
+      <EditTwoTone
+        twoToneColor="#f57800"
+        style={{ cursor: "pointer" }}
+        onClick={() => {
+          setDataUpdate(entity);
+          setOpenModalUpdate(true);
+        }}
+      />
+    ),
+    // responsive: ["sm"],
+  },
+];
 
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      valueType: "dateTime",
-      sorter: true,
-      hideInSearch: true,
-      sortDirections: ["ascend"],
-    },
-      {
-      title: "Updated At",
-      dataIndex: "updatedAt",
-      valueType: "dateTime",
-      sorter: true,
-      hideInSearch: true,
-      sortDirections: ["ascend"],
-      hideInTable: true, 
-    }, 
-    {
-      title: "Actions",
-      hideInSearch: true,
-      render: (_, entity) => (
-        <EditTwoTone
-          twoToneColor="#f57800"
-          style={{ cursor: "pointer" }}
-          onClick={() => {
-            setDataUpdate(entity);
-            setOpenModalUpdate(true);
-          }}
-        />
-
-      ),
-    },
-  ];
 
   return (
     <>

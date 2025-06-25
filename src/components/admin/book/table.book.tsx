@@ -58,104 +58,112 @@ const TableBook = () => {
   };
 
   const columns: ProColumns<IBookTable>[] = [
-    {
-      dataIndex: "index",
-      valueType: "indexBorder",
-      width: 48,
-    },
-    {
-      title: "Book ID",
-      dataIndex: "id",
-      hideInSearch: true,
-      render: (_, entity) => (
-        <a
+  {
+    dataIndex: "index",
+    valueType: "indexBorder",
+    width: 48,
+    responsive: ["sm"],
+  },
+  {
+    title: "Book ID",
+    dataIndex: "id",
+    hideInSearch: true,
+    render: (_, entity) => (
+      <a
+        onClick={() => {
+          setDataViewDetail(entity);
+          setOpenViewDetail(true);
+        }}
+      >
+        {entity.id}
+      </a>
+    ),
+  },
+  {
+    title: "Name",
+    dataIndex: "name",
+    responsive: ["xs"],
+  },
+  {
+    title: "Author",
+    dataIndex: "author",
+    responsive: ["md"],
+  },
+  {
+    title: "Category",
+    dataIndex: "category",
+    responsive: ["md"],
+  },
+  {
+    title: "Price",
+    dataIndex: "price",
+    hideInSearch: true,
+    render: (_, record) =>
+      new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      }).format(record.price),
+    sorter: true,
+    sortDirections: ["ascend"],
+    responsive: ["sm"],
+  },
+  {
+    title: "Created At",
+    dataIndex: "createdAt",
+    valueType: "dateTime",
+    hideInSearch: true,
+    sorter: true,
+    sortDirections: ["ascend"],
+    responsive: ["lg"],
+  },
+  {
+    title: "Updated At",
+    dataIndex: "updatedAt",
+    valueType: "dateTime",
+    hideInSearch: true,
+    hideInTable: true,
+  },
+  {
+    title: "Actions",
+    hideInSearch: true,
+    render: (_, entity) => (
+      <>
+        <EditTwoTone
+          twoToneColor="#f57800"
+          style={{ cursor: "pointer", marginRight: 10 }}
           onClick={() => {
-            setDataViewDetail(entity);
-            setOpenViewDetail(true);
+            setOpenModalUpdate(true);
+            setDataUpdate(entity);
           }}
+        />
+        <Popconfirm
+          placement="leftTop"
+          title="Confirm delete book"
+          description="Are you sure to delete this book?"
+          onConfirm={() => {
+            if (entity.id !== undefined) {
+              handleDeleteBook(entity.id);
+            } else {
+              notification.error({
+                message: "Invalid book",
+                description: "Cannot delete book with missing ID",
+              });
+            }
+          }}
+          okText="Yes"
+          cancelText="No"
+          okButtonProps={{ loading: isDeleteBook }}
         >
-          {entity.id}
-        </a>
-      ),
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-    },
-    {
-      title: "Author",
-      dataIndex: "author",
-    },
-    {
-      title: "Category",
-      dataIndex: "category",
-      // hideInSearch: true,
-    },
-    {
-      title: "Price",
-      dataIndex: "price",
-      hideInSearch: true,
-      render: (_, record) =>
-        new Intl.NumberFormat("vi-VN", {
-          style: "currency",
-          currency: "VND",
-        }).format(record.price),
-      sorter: true,
-      sortDirections: ["ascend"],
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      valueType: "dateTime",
-      hideInSearch: true,
-      sorter: true,
-      sortDirections: ["ascend"],
-    },
-    {
-      title: "Updated At",
-      dataIndex: "updatedAt",
-      valueType: "dateTime",
-      hideInSearch: true,
-      hideInTable: true,
-    },
-    {
-      title: "Actions",
-      hideInSearch: true,
-      render: (_, entity) => (
-        <>
-          <EditTwoTone
-            twoToneColor="#f57800"
-            style={{ cursor: "pointer", marginRight: 10 }}
-            onClick={() => {
-              setOpenModalUpdate(true);
-              setDataUpdate(entity);
-            }}
-          />
-          <Popconfirm
-            placement="leftTop"
-            title="Confirm delete book"
-            description="Are you sure to delete this book?"
-            onConfirm={() => {
-              if (entity.id !== undefined) {
-                handleDeleteBook(entity.id);
-              } else {
-                notification.error({
-                  message: "Invalid book",
-                  description: "Cannot delete book with missing ID",
-                });
-              }
-            }} okText="Yes"
-            cancelText="No"
-            okButtonProps={{ loading: isDeleteBook }}
-          >
-            <span style={{ cursor: "pointer" }}>
-              <DeleteTwoTone twoToneColor="#ff4d4f" />
-            </span>
-          </Popconfirm>
-        </>
-      ),
-    },
-  ];
+          <span style={{ cursor: "pointer" }}>
+            <DeleteTwoTone twoToneColor="#ff4d4f" />
+          </span>
+        </Popconfirm>
+      </>
+    ),
+    // responsive: ["xs"],
+  },
+];
+
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { Avatar, Badge, Descriptions, Drawer } from "antd";
+import { Avatar, Badge, Descriptions, Drawer, Grid } from "antd";
 import dayjs from "dayjs";
 
 interface IProps {
@@ -19,48 +19,63 @@ const DetailUser = ({
     setDataViewDetail(null);
   };
 
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
+
   return (
     <Drawer
-      title="User details"
-      width="50vw"
+      title="User Details"
+      width={screens.xs ? "90vw" : "50vw"}
       onClose={onClose}
       open={openViewDetail}
+      bodyStyle={{ paddingBottom: 24 }}
     >
-      <Descriptions title="Details" bordered column={2}>
+      <Descriptions
+        title="User Information"
+        bordered
+        column={screens.xs ? 1 : 2}
+        size="middle"
+      >
         <Descriptions.Item label="ID">
           {dataViewDetail?.id}
         </Descriptions.Item>
+
         <Descriptions.Item label="Full Name">
           {dataViewDetail?.name}
         </Descriptions.Item>
+
         <Descriptions.Item label="Email">
           {dataViewDetail?.email}
         </Descriptions.Item>
+
         <Descriptions.Item label="Phone">
           {dataViewDetail?.phone}
         </Descriptions.Item>
+
         <Descriptions.Item label="Role">
           <Badge
             status={dataViewDetail?.role === "admin" ? "processing" : "success"}
             text={dataViewDetail?.role?.toUpperCase()}
           />
         </Descriptions.Item>
-       <Descriptions.Item label="Avatar">
-  <Avatar
-    size={40}
-    src={
-      dataViewDetail?.avatar ||
-      `https://ui-avatars.com/api/?name=${encodeURIComponent(dataViewDetail?.name || "User")}&background=random`
-    }
-    // onError={(e) => {
-    //   (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dataViewDetail?.name || "User")}&background=random`;
-    // }}
-  />
-</Descriptions.Item>
+
+        <Descriptions.Item label="Avatar">
+          <Avatar
+            size={64}
+            src={
+              dataViewDetail?.avatar ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                dataViewDetail?.name || "User"
+              )}&background=random`
+            }
+            style={{ objectFit: "cover" }}
+          />
+        </Descriptions.Item>
 
         <Descriptions.Item label="Created At">
           {dayjs(dataViewDetail?.createdAt).format("MM-DD-YYYY HH:mm")}
         </Descriptions.Item>
+
         <Descriptions.Item label="Updated At">
           {dayjs(dataViewDetail?.updatedAt).format("MM-DD-YYYY HH:mm")}
         </Descriptions.Item>

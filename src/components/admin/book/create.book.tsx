@@ -36,14 +36,16 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
   const [isSubmit, setIsSubmit] = useState(false);
   const [listCategory, setListCategory] = useState<{ label: string; value: string }[]>([]);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   useEffect(() => {
     const fetchCategory = async () => {
       const res = await getCategoryAPI();
       if (res && res.data) {
         const options = res.data.map((item: { id: number; name: string }) => ({
-  label: item.name,
-  value: item.name,
-}));
+          label: item.name,
+          value: item.name,
+        }));
         setListCategory(options);
       }
     };
@@ -90,17 +92,12 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
       cancelText="Cancel"
       maskClosable={false}
       destroyOnClose
-      width="50vw"
+      width={isMobile ? "100vw" : "50vw"}
     >
       <Divider />
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        autoComplete="off"
-      >
-        <Row gutter={16}>
-          <Col span={12}>
+      <Form form={form} layout="vertical" onFinish={onFinish} autoComplete="off">
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={12}>
             <Form.Item<FieldType>
               label="Book Title"
               name="name"
@@ -109,7 +106,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
               <Input />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item<FieldType>
               label="Author"
               name="author"
@@ -119,7 +116,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
             </Form.Item>
           </Col>
 
-          <Col span={8}>
+          <Col xs={24} md={8}>
             <Form.Item<FieldType>
               label="Price"
               name="price"
@@ -134,7 +131,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
             </Form.Item>
           </Col>
 
-          <Col span={8}>
+          <Col xs={24} md={8}>
             <Form.Item<FieldType>
               label="Stock Quantity"
               name="stock"
@@ -144,7 +141,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
             </Form.Item>
           </Col>
 
-          <Col span={8}>
+          <Col xs={24} md={8}>
             <Form.Item<FieldType>
               label="Category"
               name="category"
@@ -196,5 +193,6 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
     </Modal>
   );
 };
+
 
 export default CreateBook;

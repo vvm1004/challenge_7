@@ -45,6 +45,8 @@ const UpdateBook = ({
   const [isSubmit, setIsSubmit] = useState(false);
   const [listCategory, setListCategory] = useState<{ label: string; value: string }[]>([]);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   useEffect(() => {
     const fetchCategory = async () => {
       const res = await getCategoryAPI();
@@ -115,7 +117,7 @@ const UpdateBook = ({
       cancelText="Cancel"
       maskClosable={false}
       destroyOnClose
-      width="50vw"
+      width={isMobile ? "100vw" : "50vw"}
     >
       <Divider />
       <Form
@@ -124,12 +126,12 @@ const UpdateBook = ({
         onFinish={onFinish}
         autoComplete="off"
       >
-        <Row gutter={16}>
+        <Row gutter={[16, 16]}>
           <Form.Item<FieldType> name="id" hidden>
             <Input />
           </Form.Item>
 
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item<FieldType>
               label="Book Name"
               name="name"
@@ -139,7 +141,7 @@ const UpdateBook = ({
             </Form.Item>
           </Col>
 
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item<FieldType>
               label="Author"
               name="author"
@@ -149,7 +151,7 @@ const UpdateBook = ({
             </Form.Item>
           </Col>
 
-          <Col span={8}>
+          <Col xs={24} md={8}>
             <Form.Item<FieldType>
               label="Price"
               name="price"
@@ -164,7 +166,7 @@ const UpdateBook = ({
             </Form.Item>
           </Col>
 
-          <Col span={8}>
+          <Col xs={24} md={8}>
             <Form.Item<FieldType>
               label="Stock"
               name="stock"
@@ -174,7 +176,7 @@ const UpdateBook = ({
             </Form.Item>
           </Col>
 
-          <Col span={8}>
+          <Col xs={24} md={8}>
             <Form.Item<FieldType>
               label="Category"
               name="category"
