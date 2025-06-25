@@ -3,9 +3,9 @@ import { ProTable } from "@ant-design/pro-components";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import { EditTwoTone } from "@ant-design/icons";
 import { Tag, App } from "antd";
-import { getOrdersAPI, getUserByIdAPI } from "@/services/api";
+import { getBookByIdAPI, getOrdersAPI, getUserByIdAPI } from "@/services/api";
 import UpdateOrder from "./update.order";
-// import DetailOrder from "./detail.order"; // nếu chưa có thì tạo 1 component modal đơn giản
+import DetailOrder from "./detail.order"; // nếu chưa có thì tạo 1 component modal đơn giản
 
 interface TSearchOrder {
   userFullName?: string;
@@ -56,9 +56,10 @@ const TableOrder = () => {
         new Intl.NumberFormat("vi-VN", {
           style: "currency",
           currency: "VND",
-        }).format(record.totalPrice),
+        }).format(record.totalPrice || 0),
       hideInSearch: true,
-    }, {
+    },
+    {
       title: "Status",
       dataIndex: "status",
       valueType: "select",
@@ -78,6 +79,15 @@ const TableOrder = () => {
       hideInSearch: true,
       sortDirections: ["ascend"],
     },
+      {
+      title: "Updated At",
+      dataIndex: "updatedAt",
+      valueType: "dateTime",
+      sorter: true,
+      hideInSearch: true,
+      sortDirections: ["ascend"],
+      hideInTable: true, 
+    }, 
     {
       title: "Actions",
       hideInSearch: true,
@@ -116,24 +126,39 @@ const TableOrder = () => {
             if (params.status) {
               query.status = params.status;
             }
+
             const res = await getOrdersAPI(query);
             const ordersRaw: IOrder[] = res.result || [];
 
             const enrichedOrders: IOrderWithUser[] = await Promise.all(
               ordersRaw.map(async (order) => {
+                // 1. Lấy thông tin user
+                let userFullName = "Unknown";
                 try {
                   const userRes = await getUserByIdAPI(order.userId);
-                  const user = userRes.data;
-                  return {
-                    ...order,
-                    userFullName: user?.name || "Unknown",
-                  };
-                } catch {
-                  return {
-                    ...order,
-                    userFullName: "Unknown",
-                  };
+                  userFullName = userRes?.data?.name || "Unknown";
+                } catch { }
+
+                // 2. Lấy thông tin sách và tính tổng tiền
+                let totalPrice = 0;
+                try {
+                  const bookPromises = order.productIds.map((bookId) =>
+                    getBookByIdAPI(bookId)
+                  );
+                  const bookResults = await Promise.all(bookPromises);
+                  totalPrice = bookResults.reduce(
+                    (acc, res) => acc + (res.data?.price || 0),
+                    0
+                  );
+                } catch (e) {
+                  console.error("Error loading book info", e);
                 }
+
+                return {
+                  ...order,
+                  userFullName,
+                  totalPrice,
+                };
               })
             );
 
@@ -155,6 +180,7 @@ const TableOrder = () => {
             setLoading(false);
           }
         }}
+
         pagination={{
           current: meta.current,
           pageSize: meta.pageSize,
@@ -165,12 +191,12 @@ const TableOrder = () => {
         headerTitle="Orders Table"
       />
 
-      {/* <DetailOrder
+      <DetailOrder
         openViewDetail={openViewDetail}
         setOpenViewDetail={setOpenViewDetail}
         dataViewDetail={dataViewDetail}
         setDataViewDetail={setDataViewDetail}
-      /> */}
+      />
 
       <UpdateOrder
         openModalUpdate={openModalUpdate}

@@ -13,39 +13,44 @@ const AdminDashboard = () => {
   useEffect(() => {
     const initDashboard = async () => {
       const res = await getDashboardAPI();
-      if (res && res.data) setDataDashboard(res.data);
+      if (res && res.success && res.data) {
+        setDataDashboard({
+          countUser: res.data.countUser ?? 0,
+          countBook: res.data.countBook ?? 0,
+          countOrder: res.data.countOrder ?? 0,
+        });
+      }
     };
     initDashboard();
   }, []);
 
   const formatter = (value: any) => <CountUp end={value} separator="," />;
+
   return (
     <Row gutter={[40, 40]}>
       <Col span={8}>
-        <Card title="" bordered={false}>
+        <Card bordered={false}>
           <Statistic
-            title="Tổng Users"
+            title="Total Users"
             value={dataDashboard.countUser}
             formatter={formatter}
           />
         </Card>
       </Col>
       <Col span={8}>
-        <Card title="" bordered={false}>
+        <Card bordered={false}>
           <Statistic
-            title="Tổng Đơn hàng"
+            title="Total Orders"
             value={dataDashboard.countOrder}
-            precision={2}
             formatter={formatter}
           />
         </Card>
       </Col>
       <Col span={8}>
-        <Card title="" bordered={false}>
+        <Card bordered={false}>
           <Statistic
-            title="Tổng Books"
+            title="Total Books"
             value={dataDashboard.countBook}
-            precision={2}
             formatter={formatter}
           />
         </Card>

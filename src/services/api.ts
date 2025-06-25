@@ -1,13 +1,6 @@
 import axios from "services/axios.customize";
 
-// export const fetchAccountAPI = () => {
-//   const urlBackend = "/api/v1/auth/account";
-//   return axios.get<IBackendRes<IFetchAccount>>(urlBackend, {
-//     headers: {
-//       delay: 1000,
-//     },
-//   });
-// };
+
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 //User Module
@@ -143,6 +136,9 @@ export const updateBookAPI = async (id: number, data: Partial<IBookTable>) => {
     };
   }
 };
+export const getBookByIdAPI = async (id: number) => {
+  return await axios.get(`/books/${id}`);
+};
 
 // Order Module
 
@@ -170,14 +166,28 @@ export const updateOrderAPI = async (id: number, data: Partial<IBookTable>) => {
   }
 };
 
+// Dashboard Module
+export const getDashboardAPI = async () => {
+  try {
+    const [userRes, bookRes, orderRes] = await Promise.all([
+      axios.get("/users", { params: { _page: 1, _per_page: 1 } }),
+      axios.get("/books", { params: { _page: 1, _per_page: 1 } }),
+      axios.get("/orders", { params: { _page: 1, _per_page: 1 } }),
+    ]);
 
-export const getDashboardAPI = () => {
-  const urlBackend = `/api/v1/database/dashboard`;
-  return axios.get<
-    IBackendRes<{
-      countOrder: number;
-      countUser: number;
-      countBook: number;
-    }>
-  >(urlBackend);
+    return {
+      success: true,
+      data: {
+        countUser: userRes.data.items || 0,
+        countBook: bookRes.data.items || 0,
+        countOrder: orderRes.data.items || 0,
+      },
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: "Failed to fetch dashboard stats",
+    };
+  }
 };
+
