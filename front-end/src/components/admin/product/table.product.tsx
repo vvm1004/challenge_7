@@ -10,23 +10,23 @@ import { CSVLink } from "react-csv";
 import { ProTable } from "@ant-design/pro-components";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 
-import DetailBook from "./detail.book";
-import CreateBook from "./create.book";
-import UpdateBook from "./update.book";
+import DetailProduct from "./detail.product";
+import CreateProduct from "./create.product";
+import UpdateProduct from "./update.product";
 
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import {
-  fetchListBooks,
-  deleteBook,
+  fetchListProducts,
+  deleteProduct,
   resetDelete,
-} from "@/redux/book/bookSlice";
+} from "@/redux/product/productSlice";
 
-const TableBook = () => {
+const TableProduct = () => {
   const dispatch = useAppDispatch();
   const actionRef = useRef<ActionType>();
 
-  const { listBooks, total, loading, isDeleteSuccess, error } = useAppSelector(
-    (state) => state.book
+  const { listProducts, total, loading, isDeleteSuccess, error } = useAppSelector(
+    (state) => state.product
   );
 
   const { message, notification } = App.useApp();
@@ -35,14 +35,13 @@ const TableBook = () => {
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState("");
   const [searchName, setSearchName] = useState("");
-  const [searchAuthor, setSearchAuthor] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
 
   const [openViewDetail, setOpenViewDetail] = useState(false);
-  const [dataViewDetail, setDataViewDetail] = useState<IBookTable | null>(null);
+  const [dataViewDetail, setDataViewDetail] = useState<IProductTable | null>(null);
   const [openModalCreate, setOpenModalCreate] = useState(false);
   const [openModalUpdate, setOpenModalUpdate] = useState(false);
-  const [dataUpdate, setDataUpdate] = useState<IBookTable | null>(null);
+  const [dataUpdate, setDataUpdate] = useState<IProductTable | null>(null);
 
   // Fetch Redux data
   const fetchData = () => {
@@ -53,19 +52,18 @@ const TableBook = () => {
 
     if (sortField) query._sort = sortField;
     if (searchName) query.name = searchName;
-    if (searchAuthor) query.author = searchAuthor;
     if (searchCategory) query.category = searchCategory;
 
-    dispatch(fetchListBooks(query));
+    dispatch(fetchListProducts(query));
   };
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, pageSize, sortField, searchName, searchAuthor, searchCategory]);
+  }, [currentPage, pageSize, sortField, searchName, searchCategory]);
 
   useEffect(() => {
     if (isDeleteSuccess) {
-      message.success("Deleted book successfully");
+      message.success("Deleted product successfully");
       dispatch(resetDelete());
       fetchData();
     }
@@ -80,11 +78,11 @@ const TableBook = () => {
     }
   }, [error]);
 
-  const handleDeleteBook = (id: number) => {
-    dispatch(deleteBook(id));
+  const handleDeleteProduct = (id: number) => {
+    dispatch(deleteProduct(id));
   };
 
-  const columns: ProColumns<IBookTable>[] = [
+  const columns: ProColumns<IProductTable>[] = [
     {
       dataIndex: "index",
       valueType: "indexBorder",
@@ -92,7 +90,7 @@ const TableBook = () => {
       responsive: ["sm"],
     },
     {
-      title: "Book ID",
+      title: "Product ID",
       dataIndex: "id",
       hideInSearch: true,
       render: (_, entity) => (
@@ -109,11 +107,6 @@ const TableBook = () => {
     {
       title: "Name",
       dataIndex: "name",
-      // responsive: ["md"],
-    },
-    {
-      title: "Author",
-      dataIndex: "author",
       // responsive: ["md"],
     },
     {
@@ -160,15 +153,15 @@ const TableBook = () => {
           />
           <Popconfirm
             placement="leftTop"
-            title="Confirm delete book"
-            description="Are you sure to delete this book?"
+            title="Confirm delete product"
+            description="Are you sure to delete this product?"
             onConfirm={() => {
               if (entity.id !== undefined) {
-                handleDeleteBook(entity.id);
+                handleDeleteProduct(entity.id);
               } else {
                 notification.error({
-                  message: "Invalid book",
-                  description: "Cannot delete book with missing ID",
+                  message: "Invalid product",
+                  description: "Cannot delete product with missing ID",
                 });
               }
             }}
@@ -185,10 +178,10 @@ const TableBook = () => {
 
   return (
     <>
-      <ProTable<IBookTable>
+      <ProTable<IProductTable>
         columns={columns}
         actionRef={actionRef}
-        dataSource={listBooks}
+        dataSource={listProducts}
         loading={loading}
         rowKey="id"
         pagination={{
@@ -210,19 +203,17 @@ const TableBook = () => {
         }}
         onSubmit={(values) => {
           setSearchName(values.name || "");
-          setSearchAuthor(values.author || "");
           setSearchCategory(values.category || "");
           setCurrentPage(1);
         }}
         onReset={() => {
           setSearchName("");
-          setSearchAuthor("");
           setSearchCategory("");
           setCurrentPage(1);
         }}
-        headerTitle="Books Table"
+        headerTitle="Products Table"
         toolBarRender={() => [
-          <CSVLink data={listBooks} filename="books.csv">
+          <CSVLink data={listProducts} filename="products.csv">
             <Button icon={<ExportOutlined />} type="primary">
               Export
             </Button>
@@ -232,25 +223,25 @@ const TableBook = () => {
             type="primary"
             onClick={() => setOpenModalCreate(true)}
           >
-            Add New Book
+            Add New Product
           </Button>,
         ]}
       />
 
-      <DetailBook
+      <DetailProduct
         openViewDetail={openViewDetail}
         setOpenViewDetail={setOpenViewDetail}
         dataViewDetail={dataViewDetail}
         setDataViewDetail={setDataViewDetail}
       />
 
-      <CreateBook
+      <CreateProduct
         openModalCreate={openModalCreate}
         setOpenModalCreate={setOpenModalCreate}
         refreshTable={fetchData}
       />
 
-      <UpdateBook
+      <UpdateProduct
         openModalUpdate={openModalUpdate}
         setOpenModalUpdate={setOpenModalUpdate}
         refreshTable={fetchData}
@@ -261,4 +252,4 @@ const TableBook = () => {
   );
 };
 
-export default TableBook;
+export default TableProduct;

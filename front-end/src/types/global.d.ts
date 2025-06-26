@@ -15,17 +15,15 @@ declare global {
 
 
 
-  interface IBookTable {
+  interface IProductTable {
     id?: number;
     name: string;
     description?: string;
-    author: string;
     price: number;
     stock: number;
     category: string;
     createdAt: string;
     updatedAt: string;
-    thumbnail?: string;
   }
 
  type OrderStatus = "pending" | "processing" | "shipped" | "delivered";

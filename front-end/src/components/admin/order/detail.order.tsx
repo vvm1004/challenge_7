@@ -1,7 +1,7 @@
 import { Badge, Descriptions, Divider, Drawer } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { getUserByIdAPI, getBookByIdAPI } from "@/services/api";
+import { getUserByIdAPI, getProductByIdAPI } from "@/services/api";
 
 interface IProps {
   openViewDetail: boolean;
@@ -30,7 +30,7 @@ const DetailOrder = ({
         setUserInfo(userRes.data);
 
         const bookPromises = dataViewDetail.productIds.map((bookId) =>
-          getBookByIdAPI(bookId)
+          getProductByIdAPI(bookId)
         );
         const bookResults = await Promise.all(bookPromises);
         setBookList(bookResults.map((res) => res.data));
@@ -83,7 +83,6 @@ const DetailOrder = ({
 
       <Divider orientation="left">Order Info</Divider>
       <Descriptions bordered column={isMobile ? 1 : 2}>
-        <Descriptions.Item label="Amount">{dataViewDetail?.amount}</Descriptions.Item>
         <Descriptions.Item label="Total Price">
           {new Intl.NumberFormat("vi-VN", {
             style: "currency",

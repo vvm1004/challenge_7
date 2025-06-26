@@ -13,7 +13,7 @@ import {
 } from "antd";
 import type { FormProps } from "antd";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { createNewBook, resetCreate } from "@/redux/book/bookSlice";
+import { createNewProduct, resetCreate } from "@/redux/product/productSlice";
 import { getCategoryAPI } from "@/services/api";
 
 interface IProps {
@@ -24,7 +24,6 @@ interface IProps {
 
 type FieldType = {
   name: string;
-  author: string;
   price: number;
   stock: number;
   category: string;
@@ -32,7 +31,7 @@ type FieldType = {
   description?: string;
 };
 
-const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProps) => {
+const CreateProduct = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProps) => {
   const { message, notification } = App.useApp();
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
@@ -44,7 +43,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  const { isCreateSuccess, error } = useAppSelector((state) => state.book);
+  const { isCreateSuccess, error } = useAppSelector((state) => state.product);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -62,7 +61,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
 
   useEffect(() => {
     if (isCreateSuccess) {
-      message.success("Book created successfully");
+      message.success("Product created successfully");
       dispatch(resetCreate());
       form.resetFields();
       setOpenModalCreate(false);
@@ -85,7 +84,6 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
     const payload = {
       ...values,
       name: values.name.trim(),
-      author: values.author.trim(),
       thumbnail: values.thumbnail?.trim() || "",
       description: values.description?.trim() || "",
       category: values.category?.trim() || "",
@@ -93,14 +91,14 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
       updatedAt: new Date().toISOString(),
     };
 
-    await dispatch(createNewBook(payload));
+    await dispatch(createNewProduct(payload));
     setIsSubmit(false);
   };
 
 
   return (
     <Modal
-      title="Add New Book"
+      title="Add New Product"
       open={openModalCreate}
       onOk={() => form.submit()}
       onCancel={() => {
@@ -127,16 +125,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={12}>
-            <Form.Item<FieldType>
-              label="Author"
-              name="author"
-              rules={[{ required: true, message: "Please enter author name!" }]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-
+        
           <Col xs={24} md={8}>
             <Form.Item<FieldType>
               label="Price"
@@ -174,41 +163,10 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
             </Form.Item>
           </Col>
 
-          <Col span={24}>
-            <Form.Item<FieldType>
-              label="Thumbnail Image URL"
-              name="thumbnail"
-              rules={[{ required: true, message: "Please enter thumbnail URL!" }]}
-            >
-              <Input placeholder="https://..." />
-            </Form.Item>
-          </Col>
 
           <Col span={24}>
             <Form.Item<FieldType> label="Description (optional)" name="description">
               <Input.TextArea autoSize={{ minRows: 3 }} />
-            </Form.Item>
-          </Col>
-
-          <Col span={24}>
-            <Form.Item label="Thumbnail Preview">
-              <Form.Item shouldUpdate noStyle>
-                {() => {
-                  const thumbnail = form.getFieldValue("thumbnail");
-                  return (
-                    thumbnail && (
-                      <Image
-                        src={thumbnail}
-                        width={150}
-                        height={220}
-                        style={{ objectFit: "cover", borderRadius: 4 }}
-                        alt="thumbnail-preview"
-                        fallback="https://via.placeholder.com/150"
-                      />
-                    )
-                  );
-                }}
-              </Form.Item>
             </Form.Item>
           </Col>
         </Row>
@@ -217,4 +175,4 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
   );
 };
 
-export default CreateBook;
+export default CreateProduct;

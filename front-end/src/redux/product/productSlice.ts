@@ -2,17 +2,17 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import {
-  createBookAPI,
-  deleteBookAPI,
-  getBooksAPI,
-  getBookByIdAPI,
-  updateBookAPI,
+  createProductAPI,
+  deleteProductAPI,
+  getProductsAPI,
+  getProductByIdAPI,
+  updateProductAPI,
 } from "@/services/api";
 
-interface BookState {
-  listBooks: IBookTable[];
+interface ProductState {
+  listProducts: IProductTable[];
   total: number;
-  selectedBook?: IBookTable;
+  selectedProduct?: IProductTable;
   isCreateSuccess: boolean;
   isUpdateSuccess: boolean;
   isDeleteSuccess: boolean;
@@ -20,8 +20,8 @@ interface BookState {
   error?: string;
 }
 
-const initialState: BookState = {
-  listBooks: [],
+const initialState: ProductState = {
+  listProducts: [],
   total: 0,
   loading: false,
   isCreateSuccess: false,
@@ -31,11 +31,11 @@ const initialState: BookState = {
 };
 
 // Async thunks
-export const fetchListBooks = createAsyncThunk(
-  "books/fetchListBooks",
+export const fetchListProducts = createAsyncThunk(
+  "books/fetchListProducts",
   async (params: Record<string, any>, thunkAPI) => {
     try {
-      const res = await getBooksAPI(params);
+      const res = await getProductsAPI(params);
       return res; // { result: [...], total: number }
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.message);
@@ -43,10 +43,10 @@ export const fetchListBooks = createAsyncThunk(
   }
 );
 
-export const createNewBook = createAsyncThunk(
-  "books/createNewBook",
-  async (data: IBookTable, thunkAPI) => {
-    const res = await createBookAPI(data);
+export const createNewProduct = createAsyncThunk(
+  "books/createNewProduct",
+  async (data: IProductTable, thunkAPI) => {
+    const res = await createProductAPI(data);
     if (res.success) {
       return res.data;
     } else {
@@ -55,10 +55,10 @@ export const createNewBook = createAsyncThunk(
   }
 );
 
-export const updateBook = createAsyncThunk(
-  "books/updateBook",
-  async ({ id, data }: { id: number; data: Partial<IBookTable> }, thunkAPI) => {
-    const res = await updateBookAPI(id, data);
+export const updateProduct = createAsyncThunk(
+  "books/updateProduct",
+  async ({ id, data }: { id: number; data: Partial<IProductTable> }, thunkAPI) => {
+    const res = await updateProductAPI(id, data);
     if (res.success) {
       return res.data;
     } else {
@@ -67,10 +67,10 @@ export const updateBook = createAsyncThunk(
   }
 );
 
-export const deleteBook = createAsyncThunk(
-  "books/deleteBook",
+export const deleteProduct = createAsyncThunk(
+  "books/deleteProduct",
   async (id: number, thunkAPI) => {
-    const res = await deleteBookAPI(id);
+    const res = await deleteProductAPI(id);
     if (res.success) {
       return id;
     } else {
@@ -79,11 +79,11 @@ export const deleteBook = createAsyncThunk(
   }
 );
 
-export const fetchBookById = createAsyncThunk(
-  "books/fetchBookById",
+export const fetchProductById = createAsyncThunk(
+  "books/fetchProductById",
   async (id: number, thunkAPI) => {
     try {
-      const res = await getBookByIdAPI(id);
+      const res = await getProductByIdAPI(id);
       return res.data;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.message);
@@ -92,8 +92,8 @@ export const fetchBookById = createAsyncThunk(
 );
 
 // Slice
-const bookSlice = createSlice({
-  name: "book",
+const productSlice = createSlice({
+  name: "product",
   initialState,
   reducers: {
     resetCreate: (state) => {
@@ -108,46 +108,46 @@ const bookSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchListBooks.pending, (state) => {
+      .addCase(fetchListProducts.pending, (state) => {
         state.loading = true;
       })
-      .addCase(fetchListBooks.fulfilled, (state, action) => {
+      .addCase(fetchListProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.listBooks = action.payload.result;
+        state.listProducts = action.payload.result;
         state.total = action.payload.total;
       })
-      .addCase(fetchListBooks.rejected, (state, action) => {
+      .addCase(fetchListProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
 
-      .addCase(createNewBook.fulfilled, (state) => {
+      .addCase(createNewProduct.fulfilled, (state) => {
         state.isCreateSuccess = true;
       })
-      .addCase(createNewBook.rejected, (state, action) => {
+      .addCase(createNewProduct.rejected, (state, action) => {
         state.error = action.payload as string;
       })
 
-      .addCase(updateBook.fulfilled, (state) => {
+      .addCase(updateProduct.fulfilled, (state) => {
         state.isUpdateSuccess = true;
       })
-      .addCase(updateBook.rejected, (state, action) => {
+      .addCase(updateProduct.rejected, (state, action) => {
         state.error = action.payload as string;
       })
 
-      .addCase(deleteBook.fulfilled, (state) => {
+      .addCase(deleteProduct.fulfilled, (state) => {
         state.isDeleteSuccess = true;
       })
-      .addCase(deleteBook.rejected, (state, action) => {
+      .addCase(deleteProduct.rejected, (state, action) => {
         state.error = action.payload as string;
       })
 
-      .addCase(fetchBookById.fulfilled, (state, action) => {
-        state.selectedBook = action.payload;
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        state.selectedProduct = action.payload;
       });
   },
 });
 
-export const { resetCreate, resetUpdate, resetDelete } = bookSlice.actions;
+export const { resetCreate, resetUpdate, resetDelete } = productSlice.actions;
 
-export default bookSlice.reducer;
+export default productSlice.reducer;

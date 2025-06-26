@@ -72,33 +72,33 @@ export const getUserByIdAPI = async (id: number) => {
   return await axios.get(`users/${id}`);
 };
 
-//Book Module
-export const getBooksAPI = async (params: Record<string, any>) => {
+//Product Module
+export const getProductsAPI = async (params: Record<string, any>) => {
   await delay(50);
 
-  const res = await axios.get("/books", { params });
+  const res = await axios.get("/products", { params });
 
   return {
     result: res.data.data,
     total: res.data.items,
   };
 };
-export const deleteBookAPI = async (id: number) => {
+export const deleteProductAPI = async (id: number) => {
   try {
-    await axios.delete(`/books/${id}`);
+    await axios.delete(`/products/${id}`);
     return { success: true };
   } catch (error: any) {
     return {
       success: false,
-      message: error?.message || "Failed to delete book",
+      message: error?.message || "Failed to delete product",
     };
   }
 }
-export const createBookAPI = async (data:
-  IBookTable
+export const createProductAPI = async (data:
+  IProductTable
 ) => {
   try {
-    const response = await axios.post(`/books`, data);
+    const response = await axios.post(`/products`, data);
     return {
       data: response.data,
       success: true,
@@ -106,7 +106,7 @@ export const createBookAPI = async (data:
   } catch (error: any) {
     return {
       success: false,
-      message: error.message || "Failed to create book",
+      message: error.message || "Failed to create product",
     };
   }
 };
@@ -122,9 +122,9 @@ export const getCategoryAPI = async () => {
 };
 
 
-export const updateBookAPI = async (id: number, data: Partial<IBookTable>) => {
+export const updateProductAPI = async (id: number, data: Partial<IProductTable>) => {
   try {
-    const response = await axios.patch(`/books/${id}`, data);
+    const response = await axios.patch(`/products/${id}`, data);
     return {
       data: response.data,
       success: true,
@@ -132,12 +132,12 @@ export const updateBookAPI = async (id: number, data: Partial<IBookTable>) => {
   } catch (error: any) {
     return {
       success: false,
-      message: error.message || "Failed to update book",
+      message: error.message || "Failed to update product",
     };
   }
 };
-export const getBookByIdAPI = async (id: number) => {
-  return await axios.get(`/books/${id}`);
+export const getProductByIdAPI = async (id: number) => {
+  return await axios.get(`/products/${id}`);
 };
 
 // Order Module
@@ -151,7 +151,7 @@ export const getOrdersAPI = async (params: Record<string, any>) => {
   };
 };
 
-export const updateOrderAPI = async (id: number, data: Partial<IBookTable>) => {
+export const updateOrderAPI = async (id: number, data: Partial<IProductTable>) => {
   try {
     const response = await axios.patch(`/orders/${id}`, data);
     return {
@@ -169,9 +169,9 @@ export const updateOrderAPI = async (id: number, data: Partial<IBookTable>) => {
 // Dashboard Module
 export const getDashboardAPI = async () => {
   try {
-    const [userRes, bookRes, orderRes] = await Promise.all([
+    const [userRes, productRes, orderRes] = await Promise.all([
       axios.get("/users", { params: { _page: 1, _per_page: 1 } }),
-      axios.get("/books", { params: { _page: 1, _per_page: 1 } }),
+      axios.get("/products", { params: { _page: 1, _per_page: 1 } }),
       axios.get("/orders", { params: { _page: 1, _per_page: 1 } }),
     ]);
 
@@ -179,7 +179,7 @@ export const getDashboardAPI = async () => {
       success: true,
       data: {
         countUser: userRes.data.items || 0,
-        countBook: bookRes.data.items || 0,
+        countProduct: productRes.data.items || 0,
         countOrder: orderRes.data.items || 0,
       },
     };

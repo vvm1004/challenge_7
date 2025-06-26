@@ -14,20 +14,19 @@ import {
 import type { FormProps } from "antd";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { getCategoryAPI } from "@/services/api";
-import { updateBook, resetUpdate } from "@/redux/book/bookSlice";
+import { updateProduct, resetUpdate } from "@/redux/product/productSlice";
 
 interface IProps {
   openModalUpdate: boolean;
   setOpenModalUpdate: (v: boolean) => void;
   refreshTable: () => void;
-  dataUpdate: IBookTable | null;
-  setDataUpdate: (v: IBookTable | null) => void;
+  dataUpdate: IProductTable | null;
+  setDataUpdate: (v: IProductTable | null) => void;
 }
 
 type FieldType = {
   id: number;
   name: string;
-  author: string;
   price: number;
   stock: number;
   category: string;
@@ -51,7 +50,7 @@ const UpdateBook = ({
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  const { isUpdateSuccess, error } = useAppSelector((state) => state.book);
+  const { isUpdateSuccess, error } = useAppSelector((state) => state.product);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -72,11 +71,9 @@ const UpdateBook = ({
       form.setFieldsValue({
         id: dataUpdate.id,
         name: dataUpdate.name.trim(),
-        author: dataUpdate.author.trim(),
         price: dataUpdate.price,
         stock: dataUpdate.stock,
         category: dataUpdate.category?.trim() || "",
-        thumbnail: dataUpdate.thumbnail?.trim() || "",
         description: dataUpdate.description?.trim() || "",
       });
 
@@ -85,7 +82,7 @@ const UpdateBook = ({
 
   useEffect(() => {
     if (isUpdateSuccess) {
-      message.success("Book updated successfully");
+      message.success("Product updated successfully");
       dispatch(resetUpdate());
       form.resetFields();
       setDataUpdate(null);
@@ -108,21 +105,20 @@ const UpdateBook = ({
     const payload = {
       ...values,
       name: values.name.trim(),
-      author: values.author.trim(),
       thumbnail: values.thumbnail?.trim() || "",
       description: values.description?.trim() || "",
       category: values.category?.trim() || "",
       updatedAt: new Date().toISOString(),
     };
 
-    await dispatch(updateBook({ id: values.id, data: payload }));
+    await dispatch(updateProduct({ id: values.id, data: payload }));
     setIsSubmit(false);
   };
 
 
   return (
     <Modal
-      title="Update Book"
+      title="Update Product"
       open={openModalUpdate}
       onOk={() => form.submit()}
       onCancel={() => {
@@ -146,19 +142,9 @@ const UpdateBook = ({
 
           <Col xs={24} md={12}>
             <Form.Item<FieldType>
-              label="Book Name"
+              label="Product Name"
               name="name"
-              rules={[{ required: true, message: "Please enter book name!" }]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={12}>
-            <Form.Item<FieldType>
-              label="Author"
-              name="author"
-              rules={[{ required: true, message: "Please enter author name!" }]}
+              rules={[{ required: true, message: "Please enter product name!" }]}
             >
               <Input />
             </Form.Item>
@@ -199,41 +185,10 @@ const UpdateBook = ({
             </Form.Item>
           </Col>
 
-          <Col span={24}>
-            <Form.Item<FieldType>
-              label="Thumbnail URL"
-              name="thumbnail"
-              rules={[{ required: true, message: "Please enter thumbnail URL!" }]}
-            >
-              <Input placeholder="https://..." />
-            </Form.Item>
-          </Col>
 
           <Col span={24}>
             <Form.Item<FieldType> label="Description (optional)" name="description">
               <Input.TextArea autoSize={{ minRows: 3 }} />
-            </Form.Item>
-          </Col>
-
-          <Col span={24}>
-            <Form.Item label="Thumbnail Preview">
-              <Form.Item shouldUpdate noStyle>
-                {() => {
-                  const thumbnail = form.getFieldValue("thumbnail");
-                  return (
-                    thumbnail && (
-                      <Image
-                        src={thumbnail}
-                        width={150}
-                        height={220}
-                        style={{ objectFit: "cover", borderRadius: 4 }}
-                        alt="thumbnail-preview"
-                        fallback="https://via.placeholder.com/150"
-                      />
-                    )
-                  );
-                }}
-              </Form.Item>
             </Form.Item>
           </Col>
         </Row>

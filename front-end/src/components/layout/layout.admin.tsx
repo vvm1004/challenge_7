@@ -46,7 +46,7 @@ const LayoutAdmin = () => {
       icon: <UserOutlined />,
       children: [{ label: <Link to="/user">CRUD</Link>, key: "/user", icon: <TeamOutlined /> }],
     },
-    { label: <Link to="/book">Manage Books</Link>, key: "/book", icon: <ExceptionOutlined /> },
+    { label: <Link to="/product">Manage Products</Link>, key: "/product", icon: <ExceptionOutlined /> },
     { label: <Link to="/order">Manage Orders</Link>, key: "/order", icon: <DollarCircleOutlined /> },
   ];
 

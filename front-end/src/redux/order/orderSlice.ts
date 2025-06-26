@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getBookByIdAPI, getOrdersAPI, getUserByIdAPI, updateOrderAPI } from "@/services/api";
+import { getProductByIdAPI, getOrdersAPI, getUserByIdAPI, updateOrderAPI } from "@/services/api";
 
 interface OrderState {
     listOrders: IOrderWithUser[];
@@ -40,23 +40,10 @@ export const fetchListOrders = createAsyncThunk<
                     userFullName = userRes?.data?.name || "Unknown";
                 } catch { }
 
-                let totalPrice = 0;
-                try {
-                    const bookResults = await Promise.all(
-                        order.productIds.map((bookId) => getBookByIdAPI(bookId))
-                    );
-                    totalPrice = bookResults.reduce(
-                        (sum, book) => sum + (book.data?.price || 0),
-                        0
-                    );
-                } catch (e) {
-                    console.error("Error fetching book info", e);
-                }
 
                 return {
                     ...order,
                     userFullName,
-                    totalPrice,
                 };
             })
         );

@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "styles/global.scss";
 import { App, ConfigProvider } from "antd";
 import DashBoardPage from "pages/admin/dashboard";
-import ManageBookPage from "pages/admin/manage.book";
+import ManageProductPage from "@/pages/admin/manage.product";
 import ManageOrderPage from "pages/admin/manage.order";
 import ManageUserPage from "pages/admin/manage.user";
 import LayoutAdmin from "components/layout/layout.admin";
@@ -32,9 +32,9 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "book",
+        path: "product",
         element: (
-          <ManageBookPage />
+          <ManageProductPage />
         ),
       },
       {

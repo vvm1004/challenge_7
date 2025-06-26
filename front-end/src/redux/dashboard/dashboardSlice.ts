@@ -3,7 +3,7 @@ import { getDashboardAPI } from "@/services/api";
 
 interface DashboardData {
   countUser: number;
-  countBook: number;
+  countProduct: number;
   countOrder: number;
 }
 
@@ -14,7 +14,7 @@ interface DashboardState extends DashboardData {
 
 const initialDashboardState: DashboardState = {
   countUser: 0,
-  countBook: 0,
+  countProduct: 0,
   countOrder: 0,
   loading: false,
   error: undefined,
@@ -31,7 +31,7 @@ export const fetchDashboardData = createAsyncThunk<
     if (res.success && res.data) {
       const data: DashboardData = {
         countUser: Number(res.data.countUser ?? 0),
-        countBook: Number(res.data.countBook ?? 0),
+        countProduct: Number(res.data.countProduct ?? 0),
         countOrder: Number(res.data.countOrder ?? 0),
       };
       return data;
@@ -53,7 +53,7 @@ const dashboardSlice = createSlice({
       .addCase(fetchDashboardData.fulfilled, (state, action) => {
         state.loading = false;
         state.countUser = action.payload.countUser;
-        state.countBook = action.payload.countBook;
+        state.countProduct = action.payload.countProduct;
         state.countOrder = action.payload.countOrder;
         state.error = undefined;
       })

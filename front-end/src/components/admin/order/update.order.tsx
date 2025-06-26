@@ -73,6 +73,22 @@ const UpdateOrder = ({
     dispatch(updateOrder({ id: values.id, data: payload }));
   };
 
+  const getNextStatuses = (currentStatus: OrderStatus): OrderStatus[] => {
+    switch (currentStatus) {
+      case "pending":
+        return ["processing"];
+      case "processing":
+        return ["shipped"];
+      case "shipped":
+        return ["delivered"];
+      case "delivered":
+        return []; 
+      default:
+        return [];
+    }
+  };
+
+
   return (
     <Modal
       title={`Update Order #${dataUpdate?.id}`}
@@ -100,14 +116,14 @@ const UpdateOrder = ({
           rules={[{ required: true, message: "Please select status!" }]}
         >
           <Select
-            placeholder="Select status"
-            options={[
-              { label: "Pending", value: "pending" },
-              { label: "Processing", value: "processing" },
-              { label: "Shipped", value: "shipped" },
-              { label: "Delivered", value: "delivered" },
-            ]}
+            placeholder="Select next status"
+            disabled={dataUpdate?.status === "delivered"}
+            options={getNextStatuses(dataUpdate?.status || "pending").map((status) => ({
+              label: status.charAt(0).toUpperCase() + status.slice(1),
+              value: status,
+            }))}
           />
+
         </Form.Item>
       </Form>
     </Modal>
