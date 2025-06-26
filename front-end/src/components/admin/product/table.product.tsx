@@ -20,6 +20,7 @@ import {
   deleteProduct,
   resetDelete,
 } from "@/redux/product/productSlice";
+import { broadcastProductChange, productChannel } from "@/utils/broadcast";
 
 const TableProduct = () => {
   const dispatch = useAppDispatch();
@@ -66,6 +67,7 @@ const TableProduct = () => {
       message.success("Deleted product successfully");
       dispatch(resetDelete());
       fetchData();
+      broadcastProductChange();
     }
   }, [isDeleteSuccess]);
 
@@ -77,6 +79,20 @@ const TableProduct = () => {
       });
     }
   }, [error]);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data === "refresh-product-table") {
+        setCurrentPage(1);
+      }
+    };
+
+    productChannel.addEventListener("message", handleMessage);
+    return () => {
+      productChannel.removeEventListener("message", handleMessage);
+    };
+  }, []);
+
 
   const handleDeleteProduct = (id: number) => {
     dispatch(deleteProduct(id));

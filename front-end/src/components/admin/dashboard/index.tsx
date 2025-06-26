@@ -6,7 +6,7 @@ import { fetchDashboardData } from "@/redux/dashboard/dashboardSlice";
 
 const AdminDashboard = () => {
   const dispatch = useAppDispatch();
-  const { countOrder, countUser, countBook, loading, error } = useAppSelector(
+  const { countOrder, countUser, countProduct, loading, error } = useAppSelector(
     (state) => state.dashboard
   );
 
@@ -52,8 +52,8 @@ const AdminDashboard = () => {
       <Col xs={24} sm={12} md={8}>
         <Card bordered={false} loading={loading}>
           <Statistic
-            title="Total Books"
-            value={countBook}
+            title="Total Products"
+            value={countProduct}
             formatter={formatter}
           />
         </Card>

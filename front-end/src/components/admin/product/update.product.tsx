@@ -15,6 +15,7 @@ import type { FormProps } from "antd";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { getCategoryAPI } from "@/services/api";
 import { updateProduct, resetUpdate } from "@/redux/product/productSlice";
+import { broadcastProductChange } from "@/utils/broadcast";
 
 interface IProps {
   openModalUpdate: boolean;
@@ -34,7 +35,7 @@ type FieldType = {
   description?: string;
 };
 
-const UpdateBook = ({
+const UpdateProduct = ({
   openModalUpdate,
   setOpenModalUpdate,
   refreshTable,
@@ -88,6 +89,7 @@ const UpdateBook = ({
       setDataUpdate(null);
       setOpenModalUpdate(false);
       refreshTable();
+       broadcastProductChange(); 
     }
   }, [isUpdateSuccess]);
 
@@ -197,4 +199,4 @@ const UpdateBook = ({
   );
 };
 
-export default UpdateBook;
+export default UpdateProduct;

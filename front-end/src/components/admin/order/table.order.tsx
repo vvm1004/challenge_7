@@ -9,6 +9,7 @@ import UpdateOrder from "./update.order";
 
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { fetchListOrders } from "@/redux/order/orderSlice";
+import { orderChannel } from "@/utils/broadcast";
 
 const TableOrder = () => {
   const actionRef = useRef<ActionType>();
@@ -29,7 +30,7 @@ const TableOrder = () => {
   const [openModalUpdate, setOpenModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<IOrderWithUser | null>(null);
 
-  
+
 
   const fetchData = () => {
     const params: Record<string, any> = {
@@ -55,6 +56,19 @@ const TableOrder = () => {
       message.error(error);
     }
   }, [error]);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data === "refresh-order-table") {
+        setMeta((prev) => ({ ...prev, current: 1 }));
+      }
+    };
+
+    orderChannel.addEventListener("message", handleMessage);
+    return () => {
+      orderChannel.removeEventListener("message", handleMessage);
+    };
+  }, []);
 
 
   const columns: ProColumns<IOrderWithUser>[] = [

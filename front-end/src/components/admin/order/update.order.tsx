@@ -7,6 +7,7 @@ import {
   resetOrderUpdate,
   updateOrder,
 } from "@/redux/order/orderSlice";
+import { broadcastOrderChange } from "@/utils/broadcast";
 
 interface IProps {
   openModalUpdate: boolean;
@@ -53,6 +54,8 @@ const UpdateOrder = ({
       setOpenModalUpdate(false);
       refreshTable();
       dispatch(resetOrderUpdate());
+      
+      broadcastOrderChange(); 
     }
   }, [isUpdateSuccess]);
 

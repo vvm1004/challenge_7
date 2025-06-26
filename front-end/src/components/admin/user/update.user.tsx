@@ -6,6 +6,7 @@ import {
   updateUser,
   resetUpdate,
 } from "@/redux/user/userSlice";
+import { broadcastUserChange } from "@/utils/broadcast";
 
 interface IProps {
   openModalUpdate: boolean;
@@ -84,6 +85,8 @@ const UpdateUser = ({
     };
 
     dispatch(updateUser({ id, data: trimmedPayload }));
+    broadcastUserChange();
+
   };
 
   const handleCancel = () => {

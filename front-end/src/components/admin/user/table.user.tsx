@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { App, Avatar, Button, Popconfirm, Tag } from "antd";
 import { ProTable } from "@ant-design/pro-components";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
@@ -20,6 +20,7 @@ import {
   fetchListUsers,
   resetDelete,
 } from "@/redux/user/userSlice";
+import { broadcastUserChange, userChannel } from "utils/broadcast";
 
 const TableUser = () => {
   const dispatch = useAppDispatch();
@@ -46,8 +47,7 @@ const TableUser = () => {
 
   const { message, notification } = App.useApp();
 
-  // Fetch dữ liệu Redux
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
     const params: Record<string, any> = {
       _page: currentPage,
       _per_page: pageSize,
@@ -66,17 +66,18 @@ const TableUser = () => {
     }
 
     dispatch(fetchListUsers(params));
-  };
+  }, [currentPage, pageSize, sortField, searchName, searchEmail, dispatch]);
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, pageSize, sortField, searchName, searchEmail]);
+  }, [fetchData]);
 
   useEffect(() => {
     if (isDeleteSuccess) {
       message.success("Delete user successfully");
       fetchData();
       dispatch(resetDelete());
+      broadcastUserChange();
     }
   }, [isDeleteSuccess]);
 
@@ -88,6 +89,19 @@ const TableUser = () => {
       });
     }
   }, [error]);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data === "refresh-user-table") {
+        setCurrentPage(1); 
+      }
+    };
+
+    userChannel.addEventListener("message", handleMessage);
+    return () => {
+      userChannel.removeEventListener("message", handleMessage);
+    };
+  }, []);
 
   const handleDeleteUser = (id: number) => {
     dispatch(deleteUser(id));
