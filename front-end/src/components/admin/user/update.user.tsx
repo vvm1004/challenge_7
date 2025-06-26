@@ -42,12 +42,13 @@ const UpdateUser = ({
     if (dataUpdate) {
       form.setFieldsValue({
         id: dataUpdate.id,
-        name: dataUpdate.name,
-        email: dataUpdate.email,
-        phone: dataUpdate.phone,
+        name: dataUpdate.name.trim(),
+        email: dataUpdate.email.trim(),
+        phone: dataUpdate.phone.trim(),
         role: dataUpdate.role,
-        avatar: dataUpdate.avatar,
+        avatar: dataUpdate.avatar?.trim() || "",
       });
+
     }
   }, [dataUpdate]);
 

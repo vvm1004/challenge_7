@@ -71,14 +71,15 @@ const UpdateBook = ({
     if (dataUpdate) {
       form.setFieldsValue({
         id: dataUpdate.id,
-        name: dataUpdate.name,
-        author: dataUpdate.author,
+        name: dataUpdate.name.trim(),
+        author: dataUpdate.author.trim(),
         price: dataUpdate.price,
         stock: dataUpdate.stock,
-        category: dataUpdate.category,
-        thumbnail: dataUpdate.thumbnail,
-        description: dataUpdate.description,
+        category: dataUpdate.category?.trim() || "",
+        thumbnail: dataUpdate.thumbnail?.trim() || "",
+        description: dataUpdate.description?.trim() || "",
       });
+
     }
   }, [dataUpdate]);
 
