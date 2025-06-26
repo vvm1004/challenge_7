@@ -56,42 +56,50 @@ const CreateUser = ({
   }, [error]);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { email } = values;
+  const trimmedValues = {
+    ...values,
+    name: values.name.trim(),
+    email: values.email.trim(),
+    phone: values.phone.trim(),
+    avatar: values.avatar?.trim() || "",
+  };
 
-    try {
-      // Kiểm tra trùng email
-      const check = await checkEmailDuplicateAPI(email);
-      if (!check.success) {
-        notification.error({
-          message: "Error",
-          description: check.message || "Failed to check email",
-        });
-        return;
-      }
+  const { email } = trimmedValues;
 
-      if (check.isDuplicate) {
-        notification.error({
-          message: "Email already exists",
-          description: `A user with email ${email} already exists.`,
-        });
-        return;
-      }
-
-      // Gọi Redux thunk để tạo user
-      const payload = {
-        ...values,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      dispatch(createNewUser(payload));
-    } catch (error: any) {
+  try {
+    // Kiểm tra trùng email
+    const check = await checkEmailDuplicateAPI(email);
+    if (!check.success) {
       notification.error({
         message: "Error",
-        description: error.message || "Something went wrong",
+        description: check.message || "Failed to check email",
       });
+      return;
     }
-  };
+
+    if (check.isDuplicate) {
+      notification.error({
+        message: "Email already exists",
+        description: `A user with email ${email} already exists.`,
+      });
+      return;
+    }
+
+    const payload = {
+      ...trimmedValues,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    dispatch(createNewUser(payload));
+  } catch (error: any) {
+    notification.error({
+      message: "Error",
+      description: error.message || "Something went wrong",
+    });
+  }
+};
+
 
   const handleCancel = () => {
     setOpenModalCreate(false);

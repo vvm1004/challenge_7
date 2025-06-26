@@ -73,11 +73,16 @@ const UpdateUser = ({
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     const { id, ...rest } = values;
-    const payload = {
+
+    const trimmedPayload = {
       ...rest,
+      name: rest.name.trim(),
+      phone: rest.phone.trim(),
+      avatar: rest.avatar?.trim() || "",
       updatedAt: new Date().toISOString(),
     };
-    dispatch(updateUser({ id, data: payload }));
+
+    dispatch(updateUser({ id, data: trimmedPayload }));
   };
 
   const handleCancel = () => {

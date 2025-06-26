@@ -101,18 +101,23 @@ const UpdateBook = ({
       });
     }
   }, [error]);
-
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     setIsSubmit(true);
 
     const payload = {
       ...values,
+      name: values.name.trim(),
+      author: values.author.trim(),
+      thumbnail: values.thumbnail?.trim() || "",
+      description: values.description?.trim() || "",
+      category: values.category?.trim() || "",
       updatedAt: new Date().toISOString(),
     };
 
     await dispatch(updateBook({ id: values.id, data: payload }));
     setIsSubmit(false);
   };
+
 
   return (
     <Modal

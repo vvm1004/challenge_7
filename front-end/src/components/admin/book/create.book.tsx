@@ -84,6 +84,11 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
 
     const payload = {
       ...values,
+      name: values.name.trim(),
+      author: values.author.trim(),
+      thumbnail: values.thumbnail?.trim() || "",
+      description: values.description?.trim() || "",
+      category: values.category?.trim() || "",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -91,6 +96,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
     await dispatch(createNewBook(payload));
     setIsSubmit(false);
   };
+
 
   return (
     <Modal
