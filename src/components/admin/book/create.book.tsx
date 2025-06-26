@@ -12,7 +12,9 @@ import {
   Select,
 } from "antd";
 import type { FormProps } from "antd";
-import { createBookAPI, getCategoryAPI } from "@/services/api";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import { createNewBook, resetCreate } from "@/redux/book/bookSlice";
+import { getCategoryAPI } from "@/services/api";
 
 interface IProps {
   openModalCreate: boolean;
@@ -33,10 +35,16 @@ type FieldType = {
 const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProps) => {
   const { message, notification } = App.useApp();
   const [form] = Form.useForm();
+  const dispatch = useAppDispatch();
+
   const [isSubmit, setIsSubmit] = useState(false);
-  const [listCategory, setListCategory] = useState<{ label: string; value: string }[]>([]);
+  const [listCategory, setListCategory] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+  const { isCreateSuccess, error } = useAppSelector((state) => state.book);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -52,6 +60,25 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
     fetchCategory();
   }, []);
 
+  useEffect(() => {
+    if (isCreateSuccess) {
+      message.success("Book created successfully");
+      dispatch(resetCreate());
+      form.resetFields();
+      setOpenModalCreate(false);
+      refreshTable();
+    }
+  }, [isCreateSuccess]);
+
+  useEffect(() => {
+    if (error) {
+      notification.error({
+        message: "An error occurred",
+        description: error,
+      });
+    }
+  }, [error]);
+
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     setIsSubmit(true);
 
@@ -61,20 +88,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
       updatedAt: new Date().toISOString(),
     };
 
-    const res = await createBookAPI(payload);
-
-    if (res && res.success) {
-      message.success("Book created successfully");
-      form.resetFields();
-      setOpenModalCreate(false);
-      refreshTable();
-    } else {
-      notification.error({
-        message: "An error occurred",
-        description: res.message,
-      });
-    }
-
+    await dispatch(createNewBook(payload));
     setIsSubmit(false);
   };
 
@@ -106,6 +120,7 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
               <Input />
             </Form.Item>
           </Col>
+
           <Col xs={24} md={12}>
             <Form.Item<FieldType>
               label="Author"
@@ -125,7 +140,9 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
               <InputNumber
                 min={1000}
                 style={{ width: "100%" }}
-                formatter={(val) => `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                formatter={(val) =>
+                  `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
                 addonAfter="VND"
               />
             </Form.Item>
@@ -193,6 +210,5 @@ const CreateBook = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
     </Modal>
   );
 };
-
 
 export default CreateBook;

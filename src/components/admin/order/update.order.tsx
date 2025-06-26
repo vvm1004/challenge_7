@@ -1,7 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { App, Form, Modal, Select } from "antd";
 import type { FormProps } from "antd";
-import { updateOrderAPI, getOrdersAPI } from "@/services/api";
+
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import {
+  resetOrderUpdate,
+  updateOrder,
+} from "@/redux/order/orderSlice";
 
 interface IProps {
   openModalUpdate: boolean;
@@ -24,8 +29,12 @@ const UpdateOrder = ({
   setDataUpdate,
 }: IProps) => {
   const { message, notification } = App.useApp();
+  const dispatch = useAppDispatch();
   const [form] = Form.useForm();
-  const [isSubmit, setIsSubmit] = useState(false);
+
+  const { loading, isUpdateSuccess, error } = useAppSelector(
+    (state) => state.order
+  );
 
   useEffect(() => {
     if (dataUpdate) {
@@ -36,36 +45,32 @@ const UpdateOrder = ({
     }
   }, [dataUpdate]);
 
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    setIsSubmit(true);
+  useEffect(() => {
+    if (isUpdateSuccess) {
+      message.success("Order updated successfully");
+      form.resetFields();
+      setDataUpdate(null);
+      setOpenModalUpdate(false);
+      refreshTable();
+      dispatch(resetOrderUpdate());
+    }
+  }, [isUpdateSuccess]);
 
+  useEffect(() => {
+    if (error) {
+      notification.error({
+        message: "Update failed",
+        description: error,
+      });
+    }
+  }, [error]);
+
+  const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
     const payload = {
       status: values.status,
       updatedAt: new Date().toISOString(),
     };
-
-    try {
-      const res = await updateOrderAPI(values.id, payload);
-      if (res && res.success) {
-        message.success("Order updated successfully");
-        form.resetFields();
-        setDataUpdate(null);
-        setOpenModalUpdate(false);
-        refreshTable();
-      } else {
-        notification.error({
-          message: "Update failed",
-          description: res.message,
-        });
-      }
-    } catch (err) {
-      notification.error({
-        message: "Error",
-        description: "Something went wrong",
-      });
-    }
-
-    setIsSubmit(false);
+    dispatch(updateOrder({ id: values.id, data: payload }));
   };
 
   return (
@@ -80,7 +85,7 @@ const UpdateOrder = ({
       }}
       okText="Update"
       cancelText="Cancel"
-      okButtonProps={{ loading: isSubmit }}
+      okButtonProps={{ loading: loading }}
       maskClosable={false}
       destroyOnClose
     >

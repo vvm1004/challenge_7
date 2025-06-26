@@ -1,34 +1,33 @@
-import { getDashboardAPI } from "@/services/api";
-import { Card, Col, Row, Statistic } from "antd";
-import { useEffect, useState } from "react";
+import { Card, Col, Row, Statistic, App } from "antd";
 import CountUp from "react-countup";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import { fetchDashboardData } from "@/redux/dashboard/dashboardSlice";
 
 const AdminDashboard = () => {
-  const [dataDashboard, setDataDashboard] = useState({
-    countOrder: 0,
-    countUser: 0,
-    countBook: 0,
-  });
+  const dispatch = useAppDispatch();
+  const { countOrder, countUser, countBook, loading, error } = useAppSelector(
+    (state) => state.dashboard
+  );
 
-  const [loading, setLoading] = useState(false);
+  const { notification } = App.useApp();
 
   useEffect(() => {
-    const initDashboard = async () => {
-      setLoading(true);
-      const res = await getDashboardAPI();
-      if (res && res.success && res.data) {
-        setDataDashboard({
-          countUser: res.data.countUser ?? 0,
-          countBook: res.data.countBook ?? 0,
-          countOrder: res.data.countOrder ?? 0,
-        });
-      }
-      setLoading(false);
-    };
-    initDashboard();
+    dispatch(fetchDashboardData());
   }, []);
 
-  const formatter = (value: any) => <CountUp end={value} separator="," />;
+  useEffect(() => {
+    if (error) {
+      notification.error({
+        message: "Error",
+        description: error,
+      });
+    }
+  }, [error]);
+
+  const formatter = (value: string | number | undefined) => (
+    <CountUp end={Number(value || 0)} separator="," />
+  );
 
   return (
     <Row gutter={[24, 24]} justify="center">
@@ -36,7 +35,7 @@ const AdminDashboard = () => {
         <Card bordered={false} loading={loading}>
           <Statistic
             title="Total Users"
-            value={dataDashboard.countUser}
+            value={countUser}
             formatter={formatter}
           />
         </Card>
@@ -45,7 +44,7 @@ const AdminDashboard = () => {
         <Card bordered={false} loading={loading}>
           <Statistic
             title="Total Orders"
-            value={dataDashboard.countOrder}
+            value={countOrder}
             formatter={formatter}
           />
         </Card>
@@ -54,7 +53,7 @@ const AdminDashboard = () => {
         <Card bordered={false} loading={loading}>
           <Statistic
             title="Total Books"
-            value={dataDashboard.countBook}
+            value={countBook}
             formatter={formatter}
           />
         </Card>

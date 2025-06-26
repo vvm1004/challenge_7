@@ -12,7 +12,9 @@ import {
   Select,
 } from "antd";
 import type { FormProps } from "antd";
-import { getCategoryAPI, updateBookAPI } from "@/services/api";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import { getCategoryAPI } from "@/services/api";
+import { updateBook, resetUpdate } from "@/redux/book/bookSlice";
 
 interface IProps {
   openModalUpdate: boolean;
@@ -42,10 +44,14 @@ const UpdateBook = ({
 }: IProps) => {
   const { message, notification } = App.useApp();
   const [form] = Form.useForm();
+  const dispatch = useAppDispatch();
+
   const [isSubmit, setIsSubmit] = useState(false);
   const [listCategory, setListCategory] = useState<{ label: string; value: string }[]>([]);
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+  const { isUpdateSuccess, error } = useAppSelector((state) => state.book);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -76,6 +82,26 @@ const UpdateBook = ({
     }
   }, [dataUpdate]);
 
+  useEffect(() => {
+    if (isUpdateSuccess) {
+      message.success("Book updated successfully");
+      dispatch(resetUpdate());
+      form.resetFields();
+      setDataUpdate(null);
+      setOpenModalUpdate(false);
+      refreshTable();
+    }
+  }, [isUpdateSuccess]);
+
+  useEffect(() => {
+    if (error) {
+      notification.error({
+        message: "Update failed",
+        description: error,
+      });
+    }
+  }, [error]);
+
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     setIsSubmit(true);
 
@@ -84,21 +110,7 @@ const UpdateBook = ({
       updatedAt: new Date().toISOString(),
     };
 
-    const res = await updateBookAPI(values.id, payload);
-
-    if (res && res.success) {
-      message.success("Book updated successfully");
-      form.resetFields();
-      setDataUpdate(null);
-      setOpenModalUpdate(false);
-      refreshTable();
-    } else {
-      notification.error({
-        message: "Update failed",
-        description: res.message,
-      });
-    }
-
+    await dispatch(updateBook({ id: values.id, data: payload }));
     setIsSubmit(false);
   };
 
@@ -120,12 +132,7 @@ const UpdateBook = ({
       width={isMobile ? "100vw" : "50vw"}
     >
       <Divider />
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        autoComplete="off"
-      >
+      <Form form={form} layout="vertical" onFinish={onFinish} autoComplete="off">
         <Row gutter={[16, 16]}>
           <Form.Item<FieldType> name="id" hidden>
             <Input />
