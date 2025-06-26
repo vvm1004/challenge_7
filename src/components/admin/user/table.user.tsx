@@ -1,60 +1,96 @@
-import { getUsersAPI, deleteUserAPI } from "@/services/api";
+import { useEffect, useRef, useState } from "react";
+import { App, Avatar, Button, Popconfirm, Tag } from "antd";
+import { ProTable } from "@ant-design/pro-components";
+import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import {
-  CloudUploadOutlined,
   DeleteTwoTone,
   EditTwoTone,
   ExportOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import type { ActionType, ProColumns } from "@ant-design/pro-components";
-import { ProTable } from "@ant-design/pro-components";
-import { App, Avatar, Button, Popconfirm, Tag } from "antd";
-import { useRef, useState } from "react";
+import { CSVLink } from "react-csv";
+
 import DetailUser from "./detail.user";
 import CreateUser from "./create.user";
 import UpdateUser from "./update.user";
-import { CSVLink } from "react-csv";
+
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import {
+  deleteUser,
+  fetchListUsers,
+  resetDelete,
+} from "@/redux/user/userSlice";
 
 const TableUser = () => {
+  const dispatch = useAppDispatch();
   const actionRef = useRef<ActionType>();
-  const [currentDataTable, setCurrentDataTable] = useState<IUserTable[]>([]);
 
-  const [meta, setMeta] = useState({
-    current: 1,
-    pageSize: 5,
-    total: 0,
-  });
+  const { listUsers, total, loading, isDeleteSuccess, error } = useAppSelector(
+    (state) => state.user
+  );
 
+  // State cho phân trang, sắp xếp, tìm kiếm
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [sortField, setSortField] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchEmail, setSearchEmail] = useState("");
+
+  // Modal & detail state
   const [openViewDetail, setOpenViewDetail] = useState(false);
   const [dataViewDetail, setDataViewDetail] = useState<IUserTable | null>(null);
 
   const [openModalCreate, setOpenModalCreate] = useState(false);
-  const [openModalImport, setOpenModalImport] = useState(false);
-
   const [openModalUpdate, setOpenModalUpdate] = useState(false);
   const [dataUpdate, setDataUpdate] = useState<IUserTable | null>(null);
 
-  const [isDeleteUser, setIsDeleteUser] = useState(false);
   const { message, notification } = App.useApp();
-  
 
-  const handleDeleteUser = async (id: number) => {
-    setIsDeleteUser(true);
-    const res = await deleteUserAPI(id);
-    if (res.success) {
-      message.success("Delete user successfully");
-      refreshTable();
-    } else {
-      notification.error({
-        message: "An error occurred.",
-        description: res.message,
-      });
+  // Fetch dữ liệu Redux
+  const fetchData = () => {
+    const params: Record<string, any> = {
+      _page: currentPage,
+      _per_page: pageSize,
+    };
+
+    if (sortField) {
+      params._sort = sortField;
     }
-    setIsDeleteUser(false);
+
+    if (searchName) {
+      params.name = searchName;
+    }
+
+    if (searchEmail) {
+      params.email = searchEmail;
+    }
+
+    dispatch(fetchListUsers(params));
   };
 
-  const refreshTable = () => {
-    actionRef.current?.reload();
+  useEffect(() => {
+    fetchData();
+  }, [currentPage, pageSize, sortField, searchName, searchEmail]);
+
+  useEffect(() => {
+    if (isDeleteSuccess) {
+      message.success("Delete user successfully");
+      fetchData();
+      dispatch(resetDelete());
+    }
+  }, [isDeleteSuccess]);
+
+  useEffect(() => {
+    if (error) {
+      notification.error({
+        message: "Error",
+        description: error,
+      });
+    }
+  }, [error]);
+
+  const handleDeleteUser = (id: number) => {
+    dispatch(deleteUser(id));
   };
 
   const columns: ProColumns<IUserTable>[] = [
@@ -68,40 +104,37 @@ const TableUser = () => {
       title: "User ID",
       dataIndex: "id",
       hideInSearch: true,
-      render(dom, entity) {
+      render: (_, entity) => (
+        <a
+          onClick={() => {
+            setDataViewDetail(entity);
+            setOpenViewDetail(true);
+          }}
+          href="#"
+        >
+          {entity.id}
+        </a>
+      ),
+    },
+    {
+      title: "Avatar",
+      dataIndex: "avatar",
+      render: (_, record) => {
+        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          record.name || "User"
+        )}&background=random`;
+
         return (
-          <a
-            onClick={() => {
-              setDataViewDetail(entity);
-              setOpenViewDetail(true);
-            }}
-            href="#"
-          >
-            {entity.id}
-          </a>
+          <Avatar
+            size={40}
+            src={record.avatar || defaultAvatar}
+            style={{ objectFit: "cover" }}
+          />
         );
       },
-      
+      hideInSearch: true,
+      responsive: ["md"],
     },
-
-  {
-    title: "Avatar",
-    dataIndex: "avatar",
-    render: (_, record) => {
-      const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(record.name || "User")}&background=random`;
-
-      return (
-        <Avatar
-          size={40}
-          src={record.avatar || defaultAvatar}
-          style={{ objectFit: "cover" }}
-        />
-      );
-    },
-    hideInSearch: true,
-    hideInTable: false,
-    responsive: ["md"],
-  },
     {
       title: "Full Name",
       dataIndex: "name",
@@ -113,45 +146,12 @@ const TableUser = () => {
       copyable: true,
     },
     {
-      title: "Phone",
-      dataIndex: "phone",
-      hideInSearch: true,
-      hideInTable: true,
-    },
-    {
-      title: "Role",
-      dataIndex: "role",
-      valueType: "select",
-      valueEnum: {
-        admin: { text: "Admin", status: "Processing" },
-        customer: { text: "Customer", status: "Success" },
-      },
-      render: (_, record) => (
-        <Tag color={record.role === "admin" ? "geekblue" : "green"}>
-          {record.role.toUpperCase()}
-        </Tag>
-      ),
-      hideInSearch: true,
-      hideInTable: true,
-    },
-    {
       title: "Created At",
       dataIndex: "createdAt",
       valueType: "dateTime",
       sorter: true,
       sortDirections: ["ascend"],
-      hideInSearch: true,
       responsive: ["md"],
-      
-    },
-    {
-      title: "Updated At",
-      dataIndex: "updatedAt",
-      valueType: "dateTime",
-      sorter: true,
-      sortDirections: ["ascend"],
-      hideInTable: true,
-      hideInSearch: true,
     },
     {
       title: "Action",
@@ -181,9 +181,12 @@ const TableUser = () => {
             }}
             okText="Confirm"
             cancelText="Cancel"
-            okButtonProps={{ loading: isDeleteUser }}
+            okButtonProps={{ loading: loading }}
           >
-            <DeleteTwoTone twoToneColor="#ff4d4f" style={{ cursor: "pointer" }} />
+            <DeleteTwoTone
+              twoToneColor="#ff4d4f"
+              style={{ cursor: "pointer" }}
+            />
           </Popconfirm>
         </>
       ),
@@ -195,53 +198,42 @@ const TableUser = () => {
       <ProTable<IUserTable>
         columns={columns}
         actionRef={actionRef}
-        cardBordered
-        request={async (params, sort) => {
-          const query: Record<string, any> = {
-            _page: params.current,
-            _per_page: params.pageSize,
-          };
-
-          if (params.name) query.name = params.name;
-          if (params.email) query.email = params.email;
-
-          if (sort?.createdAt) {
-            query._sort = "createdAt";
-          }
-          if (sort?.updatedAt) {
-            query._sort = "updatedAt";
-          }
-
-          const res = await getUsersAPI(query);
-
-          setCurrentDataTable(res.result);
-          setMeta({
-            current: params.current || 1,
-            pageSize: params.pageSize || 5,
-            total: res.total || 0,
-          });
-
-          return {
-            data: res.result,
-            total: res.total,
-            success: true,
-          };
-        }}
-
-
-
+        dataSource={listUsers}
+        loading={loading}
         rowKey="id"
         pagination={{
-          current: meta.current,
-          pageSize: meta.pageSize,
-          total: meta.total,
+          current: currentPage,
+          pageSize: pageSize,
+          total: total,
+          pageSizeOptions: ['5', '10', '20', '50', '100'],
           showSizeChanger: true,
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} trên ${total} rows`,
+          onChange: (page, size) => {
+            setCurrentPage(page);
+            setPageSize(size);
+          },
+        }}
+        onChange={(_, __, sorter: any) => {
+          if (sorter?.field) {
+            setSortField(sorter.field);
+          } else {
+            setSortField("");
+          }
+        }}
+        onSubmit={(values) => {
+          setSearchName(values.name || "");
+          setSearchEmail(values.email || "");
+          setCurrentPage(1);
+        }}
+        onReset={() => {
+          setSearchName("");
+          setSearchEmail("");
+          setCurrentPage(1);
         }}
         headerTitle="Users Table"
         toolBarRender={() => [
-          <CSVLink data={currentDataTable} filename="export-user.csv">
+          <CSVLink data={listUsers || []} filename="export-user.csv">
             <Button icon={<ExportOutlined />} type="primary">
               Export
             </Button>
@@ -250,11 +242,13 @@ const TableUser = () => {
             icon={<PlusOutlined />}
             type="primary"
             onClick={() => setOpenModalCreate(true)}
+            key="add-new"
           >
             Add New
           </Button>,
         ]}
       />
+
 
       <DetailUser
         openViewDetail={openViewDetail}
@@ -266,13 +260,13 @@ const TableUser = () => {
       <CreateUser
         openModalCreate={openModalCreate}
         setOpenModalCreate={setOpenModalCreate}
-        refreshTable={refreshTable}
+        refreshTable={fetchData}
       />
 
       <UpdateUser
         openModalUpdate={openModalUpdate}
         setOpenModalUpdate={setOpenModalUpdate}
-        refreshTable={refreshTable}
+        refreshTable={fetchData}
         setDataUpdate={setDataUpdate}
         dataUpdate={dataUpdate}
       />

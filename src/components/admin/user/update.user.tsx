@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { App, Divider, Form, Input, Modal, Select } from "antd";
 import type { FormProps } from "antd";
-import { updateUserAPI } from "@/services/api";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import {
+  updateUser,
+  resetUpdate,
+} from "@/redux/user/userSlice";
 
 interface IProps {
   openModalUpdate: boolean;
@@ -27,9 +31,12 @@ const UpdateUser = ({
   setDataUpdate,
   dataUpdate,
 }: IProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { message, notification } = App.useApp();
   const [form] = Form.useForm();
+  const { message, notification } = App.useApp();
+  const dispatch = useAppDispatch();
+  const { isUpdateSuccess, loading, error } = useAppSelector(
+    (state) => state.user
+  );
 
   useEffect(() => {
     if (dataUpdate) {
@@ -44,28 +51,40 @@ const UpdateUser = ({
     }
   }, [dataUpdate]);
 
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    const { id, ...updatedFields } = values;
-
-    setIsSubmitting(true);
-    const res = await updateUserAPI(id, {
-      ...updatedFields,
-      updatedAt: new Date().toISOString(),
-    });
-
-    if (res && res.data) {
+  useEffect(() => {
+    if (isUpdateSuccess) {
       message.success("User updated successfully");
       form.resetFields();
       setOpenModalUpdate(false);
       setDataUpdate(null);
       refreshTable();
-    } else {
+      dispatch(resetUpdate());
+    }
+  }, [isUpdateSuccess]);
+
+  useEffect(() => {
+    if (error) {
       notification.error({
         message: "Error",
-        description: res.message || "Failed to update user",
+        description: error,
       });
     }
-    setIsSubmitting(false);
+  }, [error]);
+
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    const { id, ...rest } = values;
+    const payload = {
+      ...rest,
+      updatedAt: new Date().toISOString(),
+    };
+    dispatch(updateUser({ id, data: payload }));
+  };
+
+  const handleCancel = () => {
+    setOpenModalUpdate(false);
+    setDataUpdate(null);
+    form.resetFields();
+    dispatch(resetUpdate());
   };
 
   return (
@@ -73,14 +92,10 @@ const UpdateUser = ({
       title="Update User"
       open={openModalUpdate}
       onOk={() => form.submit()}
-      onCancel={() => {
-        setOpenModalUpdate(false);
-        setDataUpdate(null);
-        form.resetFields();
-      }}
+      onCancel={handleCancel}
       okText="Update"
       cancelText="Cancel"
-      confirmLoading={isSubmitting}
+      confirmLoading={loading}
     >
       <Divider />
 
@@ -136,7 +151,6 @@ const UpdateUser = ({
         <Form.Item<FieldType>
           label="Avatar URL"
           name="avatar"
-          rules={[{ required: false, message: "Please enter avatar URL" }]}
         >
           <Input placeholder="https://..." />
         </Form.Item>

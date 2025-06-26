@@ -2,13 +2,13 @@
   "users": [
     {
       "id": "1",
-      "name": "Luna Do !!!!",
+      "name": "Luna Do",
       "email": "user1@example.com",
       "phone": "0965980025",
       "avatar": "https://i.pravatar.cc/150?img=1",
       "role": "customer",
       "createdAt": "2024-01-29T00:00:00Z",
-      "updatedAt": "2025-06-25T07:53:19.675Z"
+      "updatedAt": "2025-06-26T00:30:21.810Z"
     },
     {
       "id": "2",
@@ -421,104 +421,13 @@
       "updatedAt": "2024-01-18T00:00:00Z"
     },
     {
-      "id": "43",
-      "name": "Charlie Vo",
-      "email": "user43@example.com",
-      "phone": "0912347890",
-      "avatar": "https://i.pravatar.cc/150?img=43",
-      "role": "admin",
-      "createdAt": "2024-02-26T00:00:00Z",
-      "updatedAt": "2024-03-01T00:00:00Z"
-    },
-    {
-      "id": "44",
-      "name": "Oscar Dang",
-      "email": "user44@example.com",
-      "phone": "0956384720",
-      "avatar": "https://i.pravatar.cc/150?img=44",
+      "id": "e997",
+      "name": "ccc",
+      "email": "xxx@gmail.com",
+      "phone": "05555",
       "role": "customer",
-      "createdAt": "2024-03-24T00:00:00Z",
-      "updatedAt": "2024-03-28T00:00:00Z"
-    },
-    {
-      "id": "45",
-      "name": "Leo Nguyen",
-      "email": "user45@example.com",
-      "phone": "0902374856",
-      "avatar": "https://i.pravatar.cc/150?img=45",
-      "role": "admin",
-      "createdAt": "2024-02-07T00:00:00Z",
-      "updatedAt": "2024-02-09T00:00:00Z"
-    },
-    {
-      "id": "46",
-      "name": "Tom Pham",
-      "email": "user46@example.com",
-      "phone": "0923847512",
-      "avatar": "https://i.pravatar.cc/150?img=46",
-      "role": "customer",
-      "createdAt": "2024-01-30T00:00:00Z",
-      "updatedAt": "2024-02-02T00:00:00Z"
-    },
-    {
-      "id": "47",
-      "name": "Daisy Huynh",
-      "email": "user47@example.com",
-      "phone": "0912837465",
-      "avatar": "https://i.pravatar.cc/150?img=47",
-      "role": "admin",
-      "createdAt": "2024-03-14T00:00:00Z",
-      "updatedAt": "2024-03-17T00:00:00Z"
-    },
-    {
-      "id": "48",
-      "name": "Luna Tran",
-      "email": "user48@example.com",
-      "phone": "0958237461",
-      "avatar": "https://i.pravatar.cc/150?img=48",
-      "role": "customer",
-      "createdAt": "2024-04-09T00:00:00Z",
-      "updatedAt": "2024-04-11T00:00:00Z"
-    },
-    {
-      "id": "49",
-      "name": "Fiona Le",
-      "email": "user49@example.com",
-      "phone": "0908237456",
-      "avatar": "https://i.pravatar.cc/150?img=49",
-      "role": "admin",
-      "createdAt": "2024-03-26T00:00:00Z",
-      "updatedAt": "2024-03-30T00:00:00Z"
-    },
-    {
-      "id": "50",
-      "name": "Tom Le",
-      "email": "user50@example.com",
-      "phone": "0939654815",
-      "avatar": "https://i.pravatar.cc/150?img=50",
-      "role": "customer",
-      "createdAt": "2024-03-19T00:00:00Z",
-      "updatedAt": "2024-04-11T00:00:00Z"
-    },
-    {
-      "id": "801e",
-      "name": "Minh Vo 22222",
-      "email": "minhvo2@gmail.com",
-      "phone": "01234696",
-      "role": "admin",
-      "avatar": "https://vuongquocanh.com/wp-content/uploads/2018/05/london-eye-800x534.jpg",
-      "createdAt": "2025-06-24T08:07:38.135Z",
-      "updatedAt": "2025-06-24T09:41:52.298Z"
-    },
-    {
-      "id": "5fd6",
-      "name": "Minh Vo4",
-      "email": "minhvo4@gmail.com",
-      "phone": "0147258369",
-      "role": "customer",
-      "avatar": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOQA9CPzaPX-rBErhljyeMcthAEKL03r_SnA&s",
-      "createdAt": "2025-06-24T08:58:11.774Z",
-      "updatedAt": "2025-06-24T08:58:11.774Z"
+      "createdAt": "2025-06-26T00:25:46.011Z",
+      "updatedAt": "2025-06-26T00:25:46.011Z"
     }
   ],
   "books": [

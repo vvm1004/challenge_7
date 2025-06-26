@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { App, Divider, Form, Input, Modal, Select } from "antd";
 import type { FormProps } from "antd";
-import { checkEmailDuplicateAPI, createUserAPI } from "@/services/api";
-import axios from "axios";
+
+import { checkEmailDuplicateAPI } from "@/services/api";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import {
+  createNewUser,
+  resetCreate,
+} from "@/redux/user/userSlice";
 
 interface IProps {
   openModalCreate: boolean;
@@ -18,79 +23,93 @@ type FieldType = {
   avatar: string;
 };
 
-const CreateUser = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const CreateUser = ({
+  openModalCreate,
+  setOpenModalCreate,
+  refreshTable,
+}: IProps) => {
   const { message, notification } = App.useApp();
+  const dispatch = useAppDispatch();
+  const { isCreateSuccess, error, loading } = useAppSelector(
+    (state) => state.user
+  );
+
   const [form] = Form.useForm();
 
-  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-  const { email } = values;
-
-  try {
-    //  Step 1: Call API to check email
-    const check = await checkEmailDuplicateAPI(email);
-    if (!check.success) {
-      notification.error({
-        message: "Error",
-        description: check.message || "Failed to check email",
-      });
-      return;
-    }
-
-    if (check.isDuplicate) {
-      notification.error({
-        message: "Email already exists",
-        description: `A user with email ${email} already exists.`,
-      });
-      return;
-    }
-
-    //  Step 2: Create new user
-    const payload = {
-      ...values,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setIsSubmitting(true);
-    const res = await createUserAPI(payload);
-
-    if (res.success && res.data) {
+  useEffect(() => {
+    if (isCreateSuccess) {
       message.success("User created successfully");
       form.resetFields();
       setOpenModalCreate(false);
       refreshTable();
-    } else {
+      dispatch(resetCreate());
+    }
+  }, [isCreateSuccess]);
+
+  useEffect(() => {
+    if (error) {
       notification.error({
         message: "Error",
-        description: res.message || "Failed to create user",
+        description: error,
       });
     }
-  } catch (error: any) {
-    notification.error({
-      message: "Error",
-      description: error.message || "Something went wrong",
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  }, [error]);
+
+  const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    const { email } = values;
+
+    try {
+      // Kiểm tra trùng email
+      const check = await checkEmailDuplicateAPI(email);
+      if (!check.success) {
+        notification.error({
+          message: "Error",
+          description: check.message || "Failed to check email",
+        });
+        return;
+      }
+
+      if (check.isDuplicate) {
+        notification.error({
+          message: "Email already exists",
+          description: `A user with email ${email} already exists.`,
+        });
+        return;
+      }
+
+      // Gọi Redux thunk để tạo user
+      const payload = {
+        ...values,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      dispatch(createNewUser(payload));
+    } catch (error: any) {
+      notification.error({
+        message: "Error",
+        description: error.message || "Something went wrong",
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setOpenModalCreate(false);
+    form.resetFields();
+    dispatch(resetCreate());
+  };
 
   return (
     <Modal
       title="Create New User"
       open={openModalCreate}
       onOk={() => form.submit()}
-      onCancel={() => {
-        setOpenModalCreate(false);
-        form.resetFields();
-      }}
+      onCancel={handleCancel}
       okText="Create"
       cancelText="Cancel"
-      confirmLoading={isSubmitting}
+      confirmLoading={loading}
     >
       <Divider />
-
       <Form
         form={form}
         layout="vertical"
@@ -139,7 +158,6 @@ const CreateUser = ({ openModalCreate, setOpenModalCreate, refreshTable }: IProp
         <Form.Item<FieldType>
           label="Avatar URL"
           name="avatar"
-          rules={[{ required: false, message: "Please enter avatar URL" }]}
         >
           <Input placeholder="https://..." />
         </Form.Item>
