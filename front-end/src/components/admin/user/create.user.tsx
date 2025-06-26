@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { App, Divider, Form, Input, Modal, Select } from "antd";
+import { App, Divider, Form, Input, InputNumber, Modal, Select } from "antd";
 import type { FormProps } from "antd";
 
 import { checkEmailDuplicateAPI } from "@/services/api";
@@ -56,49 +56,49 @@ const CreateUser = ({
   }, [error]);
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-  const trimmedValues = {
-    ...values,
-    name: values.name.trim(),
-    email: values.email.trim(),
-    phone: values.phone.trim(),
-    avatar: values.avatar?.trim() || "",
-  };
-
-  const { email } = trimmedValues;
-
-  try {
-    // Kiểm tra trùng email
-    const check = await checkEmailDuplicateAPI(email);
-    if (!check.success) {
-      notification.error({
-        message: "Error",
-        description: check.message || "Failed to check email",
-      });
-      return;
-    }
-
-    if (check.isDuplicate) {
-      notification.error({
-        message: "Email already exists",
-        description: `A user with email ${email} already exists.`,
-      });
-      return;
-    }
-
-    const payload = {
-      ...trimmedValues,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    const trimmedValues = {
+      ...values,
+      name: values.name.trim(),
+      email: values.email.trim(),
+      phone: values.phone.trim(),
+      avatar: values.avatar?.trim() || "",
     };
 
-    dispatch(createNewUser(payload));
-  } catch (error: any) {
-    notification.error({
-      message: "Error",
-      description: error.message || "Something went wrong",
-    });
-  }
-};
+    const { email } = trimmedValues;
+
+    try {
+      // Kiểm tra trùng email
+      const check = await checkEmailDuplicateAPI(email);
+      if (!check.success) {
+        notification.error({
+          message: "Error",
+          description: check.message || "Failed to check email",
+        });
+        return;
+      }
+
+      if (check.isDuplicate) {
+        notification.error({
+          message: "Email already exists",
+          description: `A user with email ${email} already exists.`,
+        });
+        return;
+      }
+
+      const payload = {
+        ...trimmedValues,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      dispatch(createNewUser(payload));
+    } catch (error: any) {
+      notification.error({
+        message: "Error",
+        description: error.message || "Something went wrong",
+      });
+    }
+  };
 
 
   const handleCancel = () => {
@@ -147,10 +147,19 @@ const CreateUser = ({
         <Form.Item<FieldType>
           label="Phone Number"
           name="phone"
-          rules={[{ required: true, message: "Please enter phone number" }]}
+          rules={[
+            { required: true, message: "Please enter phone number" },
+            {
+              pattern: /^[0-9]{1,11}$/,
+              message: "Phone number must contain only numbers and be up to 11 digits",
+            },
+          ]}
         >
-          <Input />
+          <Input maxLength={11} />
         </Form.Item>
+
+
+
 
         <Form.Item<FieldType>
           label="Role"
