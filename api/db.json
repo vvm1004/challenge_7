@@ -242,33 +242,13 @@
     },
     {
       "id": "25",
-      "name": "Tom Huynh",
+      "name": "Tom Huynh11",
       "email": "user25@example.com",
       "phone": "0912489327",
       "avatar": "https://i.pravatar.cc/150?img=25",
       "role": "customer",
       "createdAt": "2024-04-08T00:00:00Z",
-      "updatedAt": "2024-04-10T00:00:00Z"
-    },
-    {
-      "id": "26",
-      "name": "Charlie Pham",
-      "email": "user26@example.com",
-      "phone": "0956781324",
-      "avatar": "https://i.pravatar.cc/150?img=26",
-      "role": "admin",
-      "createdAt": "2024-02-12T00:00:00Z",
-      "updatedAt": "2024-02-15T00:00:00Z"
-    },
-    {
-      "id": "27",
-      "name": "Luna Lee",
-      "email": "user27@example.com",
-      "phone": "0948123621",
-      "avatar": "https://i.pravatar.cc/150?img=27",
-      "role": "customer",
-      "createdAt": "2024-03-18T00:00:00Z",
-      "updatedAt": "2025-06-26T16:12:12.808Z"
+      "updatedAt": "2025-06-27T02:08:24.533Z"
     }
   ],
   "products": [

@@ -84,6 +84,7 @@ const TableProduct = () => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data === "refresh-product-table") {
         setCurrentPage(1);
+        setOpenModalUpdate(false);
       }
     };
 

@@ -61,6 +61,7 @@ const TableOrder = () => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data === "refresh-order-table") {
         setMeta((prev) => ({ ...prev, current: 1 }));
+        setOpenModalUpdate(false);
       }
     };
 

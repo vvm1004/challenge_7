@@ -93,9 +93,11 @@ const TableUser = () => {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data === "refresh-user-table") {
-        setCurrentPage(1); 
+        setCurrentPage(1);
+        setOpenModalUpdate(false);
       }
     };
+
 
     userChannel.addEventListener("message", handleMessage);
     return () => {
